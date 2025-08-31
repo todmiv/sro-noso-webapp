@@ -5,11 +5,9 @@
   "type": "module",
   "homepage": "https://todmiv.github.io/sro-noso-webapp",
   "scripts": {
-    "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
+    "build:prod": "tsc -b && vite build --config vite.config.prod.js",
+    "predeploy": "npm run build:prod",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
