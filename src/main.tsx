@@ -12,17 +12,28 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    lazy: () => import('./pages/LoginPage'),
+    lazy: async () => {
+      const { default: LoginPage } = await import('./pages/LoginPage');
+      return { Component: LoginPage };
+    }
   },
   {
     path: "/documents",
-    lazy: () => import('./pages/DocumentsPage'),
+    lazy: async () => {
+      const { default: DocumentsPage } = await import('./pages/DocumentsPage');
+      return { Component: DocumentsPage };
+    }
   }
 ], {
   basename: '/sro-noso-webapp/'
 })
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <RouterProvider router={router} />
   </React.StrictMode>
