@@ -9,20 +9,29 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-  },
-  {
-    path: "/login",
-    lazy: async () => {
-      const { default: LoginPage } = await import('./pages/LoginPage');
-      return { Component: LoginPage };
-    }
-  },
-  {
-    path: "/documents",
-    lazy: async () => {
-      const { default: DocumentsPage } = await import('./pages/DocumentsPage');
-      return { Component: DocumentsPage };
-    }
+    children: [
+      {
+        index: true,
+        lazy: async () => {
+          const { default: HomePage } = await import('./pages/HomePage');
+          return { Component: HomePage };
+        }
+      },
+      {
+        path: "login",
+        lazy: async () => {
+          const { default: LoginPage } = await import('./pages/LoginPage');
+          return { Component: LoginPage };
+        }
+      },
+      {
+        path: "documents",
+        lazy: async () => {
+          const { default: DocumentsPage } = await import('./pages/DocumentsPage');
+          return { Component: DocumentsPage };
+        }
+      }
+    ]
   }
 ], {
   basename: '/sro-noso-webapp/'

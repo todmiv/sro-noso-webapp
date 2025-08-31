@@ -1,27 +1,18 @@
-import * as React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import HomePage from './pages/HomePage';
-import DocumentsPage from './pages/DocumentsPage';
-import DocumentViewPage from './pages/DocumentViewPage';
-import LoginPage from './pages/LoginPage';
+import React from 'react'
+import { Outlet } from 'react-router-dom'
+import Header from './components/Header'
+import Footer from './components/Footer'
 
 function App() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/documents" element={<DocumentsPage />} />
-          <Route path="/document/:id" element={<DocumentViewPage />} />
-          <Route path="/login" element={<LoginPage />} />
-        </Routes>
+        <Outlet />
       </main>
       <Footer />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
