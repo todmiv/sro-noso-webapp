@@ -21,8 +21,10 @@ const LoginPage = () => {
       <div className="w-full bg-white p-8 rounded-xl shadow-md">
         <div className="text-center mb-6">
           <div className="mx-auto bg-blue-100 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-            <svg className="icon-xl text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m-2-5a5 5 0 00-10 0m10 8a2 2 0 01-2 2H5a2 2 0 01-2-2m2-5a5 5 0 0010 0m-10 8v5a2 2 0 002 2h8a2 2 0 002-2v-5" />
+            <svg className="icon-xl text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="11"/>
+              <circle cx="12" cy="9" r="3"/>
+              <path d="M5 20c0-3 3-5 7-5s7 2 7 5"/>
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-800">Вход для членов СРО</h2>
