@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
   // Добавляем эффект прокрутки к началу страницы при монтировании компонента
@@ -8,12 +9,29 @@ const LoginPage = () => {
   }, []);
 
   const [inn, setInn] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn } = useAuth();
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  // Определяем, куда перенаправить после успешного входа
+  const from = location.state?.from?.pathname || '/documents';
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Попытка входа с ИНН:', inn);
-    alert(`Функционал входа будет реализован позже. Вы ввели ИНН: ${inn}`);
+    if (!inn.trim()) return;
+
+    setLoading(true);
+    try {
+      const result = await signIn(inn.trim());
+      if (result.success) {
+        navigate(from, { replace: true });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,7 +50,7 @@ const LoginPage = () => {
         </div>
         <form onSubmit={handleLogin}>
           <div className="mb-6">
-            <label htmlFor="inn" className="block text-gray-700 text-sm font-bold mb-2 flex items-center">
+            <label htmlFor="inn" className="flex items-center text-gray-700 text-sm font-bold mb-2">
               <svg className="icon-standard mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -43,7 +61,8 @@ const LoginPage = () => {
               id="inn"
               value={inn}
               onChange={(e) => setInn(e.target.value)}
-              className="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Введите 10 или 12 цифр"
               required
               pattern="\d{10}|\d{12}"
@@ -53,12 +72,22 @@ const LoginPage = () => {
           <div className="flex items-center justify-between">
             <button
               type="submit"
-              className="btn-primary w-full flex justify-center items-center"
+              disabled={loading}
+              className="btn-primary w-full flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg className="icon-standard mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              Войти
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Вход...
+                </>
+              ) : (
+                <>
+                  <svg className="icon-standard mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  Войти
+                </>
+              )}
             </button>
           </div>
         </form>

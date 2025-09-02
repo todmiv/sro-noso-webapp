@@ -1,45 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-
-const mockDocuments = [
-  { id: 1, title: "Устав Ассоциации «Нижегородское объединение строительных организаций»", date: "27.09.2023 18:25:00" },
-  { id: 2, title: "Свидетельство о государственной регистрации некоммерческой организации от 02.03.2017", date: "03.03.2017 12:28:00" },
-  { id: 3, title: "Свидетельство о государственной регистрации некоммерческой организации от 05.12.2016 года", date: "06.12.2016 12:30:00" },
-  { id: 4, title: "Свидетельство о государственной регистрации юридического лица от 29.04.2009 года", date: "06.11.2009 12:31:00" },
-  { id: 5, title: "Свидетельство о постановке организации на учет в налоговом органе от 29.04.2009 года", date: "06.11.2009 12:33:00" },
-  { id: 6, title: "Свидетельство о постановке организации на учет в налоговом органе от 05.12.2016 года", date: "06.12.2016 12:34:00" },
-  { id: 7, title: "Лист записи от 13.10.2016 года", date: "15.10.2016 12:36:00" },
-  { id: 8, title: "Лист записи от 13.10.2016 года", date: "15.10.2016 12:35:00" },
-  { id: 9, title: "Лист записи от 05.12.2016 года", date: "06.12.2016 12:38:00" },
-  { id: 10, title: "Лист записи от 02.03.2017 года", date: "03.03.2017 12:40:00" },
-  { id: 11, title: "Лист записи от 01.02.2024 года", date: "01.02.2024 18:44:00" },
-  { id: 12, title: "Решение о внесении сведений в государственный реестр саморегулируемых организаций", date: "10.11.2009 12:41:00" },
-  { id: 13, title: "Уведомление о внесении сведений в государственный реестр саморегулируемых организаций", date: "10.11.2009 12:42:00" },
-  { id: 14, title: "Положение о Контрольном комитете саморегулируемой организации Ассоциации «Нижегородское объединение строительных организаций»", date: "25.01.2019 12:06:00" },
-  { id: 15, title: "Сводная ведомость результатов проведения СОУТ и Перечень рекомендуемых мероприятий Ассоциации «Нижегородское объединение строительных организаций»", date: "13.06.2019 16:37:20" },
-  { id: 16, title: "Положение «О реестре членов саморегулируемой организации Ассоциации «Нижегородское объединение строительных организаций»", date: "27.09.2023 17:22:00" },
-  { id: 17, title: "Положение «О контроле саморегулируемой организацией Ассоциацией «Нижегородское объединение строительных организаций» за деятельностью своих членов»", date: "17.10.2023 17:34:00" },
-  { id: 18, title: "Положение о страховании гражданской ответственности в случае причинения членами Ассоциации «Нижегородское объединение строительных организаций» вреда вследствие недостатков работ, которые оказывают влияние на безопасность объектов капитального строительства", date: "26.04.2019 10:43:00" },
-  { id: 19, title: "Положение о страховании ответственности за нарушение членами Ассоциации «Нижегородское объединение строительных организаций» условий договора строительного подряда, реконструкции, капитального ремонта, договора подряда на осуществление сноса, заключенного с использованием конкурентных способов заключения договоров, и финансовых рисков, возникающих вследствие неисполнения или ненадлежащего исполнения договора подряда, заключенного с использованием конкурентных способов заключения договоров", date: "21.05.2020 19:06:00" },
-  { id: 20, title: "Положение об информационной открытости деятельности Ассоциации «Нижегородское объединение строительных организаций» и деятельности её членов", date: "17.10.2023 17:25:00" },
-  { id: 21, title: "Положение о специализированном органе саморегулируемой организации Ассоциации «Нижегородское объединение строительных организаций» по рассмотрению дел о применении в отношении членов саморегулируемой организации мер дисциплинарного воздействия", date: "26.04.2019 10:43:00" },
-  { id: 22, title: "Стандарт Ассоциации «Нижегородское объединение строительных организаций»", date: "26.04.2019 10:43:00" },
-  { id: 23, title: "Квалификационный стандарт \"Руководитель строительной организации\"", date: "12.07.2023 10:10:00" },
-  { id: 24, title: "Квалификационный стандарт \"Специалист по организации строительства\"", date: "12.07.2023 10:10:00" },
-  { id: 25, title: "Положение о компенсационном фонде возмещения вреда саморегулируемой организации Ассоциации «Нижегородское объединение строительных организаций»", date: "27.09.2023 17:23:00" },
-  { id: 26, title: "Положение о компенсационном фонде обеспечения договорных обязательств саморегулируемой организации Ассоциации «Нижегородское объединение строительных организаций»", date: "27.09.2023 17:27:00" },
-  { id: 27, title: "Положение «О системе мер дисциплинарного воздействия за несоблюдение требований законодательства Российской Федерации о градостроительной деятельности, условий членства, требований стандартов и внутренних документов Ассоциации «Нижегородское объединение строительных организаций»", date: "21.04.2022 18:08:00" },
-  { id: 28, title: "Положение «О процедуре рассмотрения жалоб на действия (бездействие) членов Ассоциации «Нижегородское объединение строительных организаций» и иных обращений, поступивших в саморегулируемую организацию»", date: "21.04.2022 18:09:00" },
-  { id: 29, title: "Положение «О проведении саморегулируемой организацией Ассоциацией «Нижегородское объединение строительных организаций» анализа деятельности своих членов на основании информации, представляемой ими в форме отчётов»", date: "27.09.2023 17:30:00" },
-  { id: 30, title: "Положение «О членстве в саморегулируемой организации Ассоциации «Нижегородское объединение строительных организаций», в том числе о размере, порядке расчёта и уплаты вступительного взноса, членских взносов»", date: "25.04.2024 14:16:25" },
-];
+import { documents, documentCategories, searchDocuments, getDocumentsStats } from '../data/documents';
+import { handleDocumentView, downloadDocument } from '../utils/documents';
 
 const DocumentsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Все категории');
 
-  const filteredDocuments = mockDocuments.filter(doc =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const stats = useMemo(() => getDocumentsStats(), []);
+
+  const filteredDocuments = useMemo(() => {
+    return searchDocuments(searchTerm, selectedCategory);
+  }, [searchTerm, selectedCategory]);
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('Все категории');
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -79,18 +60,41 @@ const DocumentsPage = () => {
               filteredDocuments.map((doc, index) => (
                 <tr key={doc.id} className={`table-row-hover ${index === filteredDocuments.length - 1 ? 'rounded-b-lg' : ''}`}>
                   <td className="py-3 px-4 border-b border-gray-200">{doc.title}</td>
-                  <td className="py-3 px-4 border-b border-gray-200">{doc.date}</td>
-                  <td className="py-3 px-4 border-b border-gray-200">
-                    <Link
-                      to={`/document/${doc.id}`}
-                      className="btn-primary inline-flex items-center text-sm"
-                    >
-                      <svg className="icon-standard mr-1 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      Просмотреть
-                    </Link>
+                  <td className="py-3 px-4 border-b border-gray-200">{doc.publishedDate}</td>
+                  <td className="py-3 px-4 border-b border-gray-200 space-x-2">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => doc.available && handleDocumentView(doc.fileUrl)}
+                        className={`inline-flex items-center text-sm px-3 py-2 rounded transition-colors ${
+                          doc.available
+                            ? "btn-primary hover:bg-blue-700"
+                            : "bg-gray-400 text-gray-200 cursor-not-allowed opacity-60"
+                        }`}
+                        title={doc.available ? `Просмотреть в браузере: ${doc.title}` : "Документ пока недоступен"}
+                        disabled={!doc.available}
+                      >
+                        <svg className={`icon-standard mr-1 ${doc.available ? "text-white" : "text-gray-300"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Просмотреть
+                      </button>
+                      <button
+                        onClick={() => doc.available && downloadDocument(doc.fileUrl, `${doc.id}.pdf`)}
+                        className={`inline-flex items-center text-sm px-3 py-2 rounded transition-colors ${
+                          doc.available
+                            ? "bg-green-600 hover:bg-green-700 text-white"
+                            : "bg-gray-400 text-gray-200 cursor-not-allowed opacity-60"
+                        }`}
+                        title={doc.available ? `Скачать: ${doc.title}` : "Документ пока недоступен"}
+                        disabled={!doc.available}
+                      >
+                        <svg className={`icon-standard mr-1 ${doc.available ? "" : "text-gray-300"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Скачать
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

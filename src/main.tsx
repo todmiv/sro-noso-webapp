@@ -3,7 +3,16 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from './App'
+import ProtectedRoute from './components/ProtectedRoute'
+import { ToastProvider } from './components/ToastProvider'
+import { AuthProvider } from './contexts/AuthContext'
+import { initErrorMonitoring } from './utils/errorMonitoring'
+import { initAnalytics } from './utils/analytics'
 import './index.css'
+
+// Initialize monitoring and analytics
+initErrorMonitoring(import.meta.env.VITE_SENTRY_DSN)
+initAnalytics(import.meta.env.VITE_PLAUSIBLE_DOMAIN)
 
 const router = createBrowserRouter([
   {
@@ -37,6 +46,19 @@ const router = createBrowserRouter([
           const { default: DocumentViewPage } = await import('./pages/DocumentViewPage');
           return { Component: DocumentViewPage };
         }
+      },
+      {
+        path: "profile",
+        lazy: async () => {
+          const { default: ProfilePage } = await import('./pages/ProfilePage');
+          return {
+            Component: () => (
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            )
+          };
+        }
       }
     ]
   }
@@ -51,6 +73,10 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ToastProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ToastProvider>
   </React.StrictMode>
 )
