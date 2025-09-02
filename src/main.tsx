@@ -30,6 +30,13 @@ const router = createBrowserRouter([
           const { default: DocumentsPage } = await import('./pages/DocumentsPage');
           return { Component: DocumentsPage };
         }
+      },
+      {
+        path: "document/:id",
+        lazy: async () => {
+          const { default: DocumentViewPage } = await import('./pages/DocumentViewPage');
+          return { Component: DocumentViewPage };
+        }
       }
     ]
   }
