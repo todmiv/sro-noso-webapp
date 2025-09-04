@@ -14,6 +14,13 @@ import './index.css'
 initErrorMonitoring(import.meta.env.VITE_SENTRY_DSN)
 initAnalytics(import.meta.env.VITE_PLAUSIBLE_DOMAIN)
 
+// Configure basename based on environment
+// For GitHub Pages deployment: '/sro-noso-webapp/'
+// For local development: undefined (root path)
+const basename = import.meta.env.VITE_BASENAME || (import.meta.env.DEV ? undefined : '/sro-noso-webapp/');
+
+console.log('Router basename:', basename);
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -63,7 +70,7 @@ const router = createBrowserRouter([
     ]
   }
 ], {
-  basename: '/sro-noso-webapp/'
+  basename: basename
 })
 
 const rootElement = document.getElementById('root');

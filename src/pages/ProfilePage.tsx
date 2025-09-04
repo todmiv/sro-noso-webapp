@@ -151,8 +151,8 @@ const ProfilePage = () => {
           <Button onClick={() => navigate('/documents')} className="bg-gray-600 hover:bg-gray-700">
             вернуться к документам
           </Button>
-          <Button onClick={handleSignOut} variant="secondary" className="border-red-300 text-red-600 hover:bg-red-50">
-            Выйти из системы
+          <Button onClick={handleSignOut} style={{backgroundColor: '#dc2626', color: 'white', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: 'none', fontWeight: '500'}} className="hover:bg-red-700 transition-colors">
+            Выйти из профиля
           </Button>
         </div>
       </div>

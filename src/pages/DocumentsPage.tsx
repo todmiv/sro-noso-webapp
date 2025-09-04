@@ -2,10 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { documents, documentCategories, searchDocuments, getDocumentsStats } from '../data/documents';
 import { handleDocumentView, downloadDocument } from '../utils/documents';
+import Modal from '../components/Modal';
 
 const DocumentsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все категории');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentDocument, setCurrentDocument] = useState<{title: string, url: string} | null>(null);
 
   const stats = useMemo(() => getDocumentsStats(), []);
 
@@ -20,6 +23,16 @@ const DocumentsPage = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('Все категории');
+  };
+
+  const handleDocumentPreview = (title: string, url: string) => {
+    setCurrentDocument({ title, url });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCurrentDocument(null);
   };
 
   return (
@@ -64,7 +77,7 @@ const DocumentsPage = () => {
                   <td className="py-3 px-4 border-b border-gray-200 space-x-2">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => doc.available && handleDocumentView(doc.fileUrl)}
+                        onClick={() => doc.available && handleDocumentPreview(doc.title, doc.fileUrl)}
                         className={`inline-flex items-center text-sm px-3 py-2 rounded transition-colors ${
                           doc.available
                             ? "btn-primary hover:bg-blue-700"
@@ -108,6 +121,27 @@ const DocumentsPage = () => {
           </tbody>
         </table>
       </div>
+
+      {/* PDF Preview Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={currentDocument?.title || "Просмотр документа"}
+        size="xl"
+        showCloseButton={true}
+        closeOnBackdropClick={true}
+      >
+        <div className="h-[600px] w-full">
+          {currentDocument && (
+            <iframe
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(currentDocument.url)}&embedded=true`}
+              className="w-full h-full border-0 rounded"
+              title={`Просмотр: ${currentDocument.title}`}
+              allowFullScreen
+            />
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

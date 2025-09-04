@@ -75,44 +75,129 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Load local reestr data
-  const loadLocalReestr = async (): Promise<Record<string, any>> => {
-    try {
-      const response = await fetch('/local_reestr.txt');
-      const text = await response.text();
-
-      if (text && text.trim()) {
-        const reestr: Record<string, any> = {};
-        const lines = text.trim().split('\n');
-
-        for (const line of lines) {
-          const parts = line.split('\t');
-          if (parts.length >= 4) {
-            const [status, orgName, inn, regDate] = parts.map(s => s.trim());
-            if (inn && orgName) {
-              reestr[inn] = {
-                status,
-                org_name: orgName,
-                registration_date: regDate
-              };
-            }
-          }
-        }
-        return reestr;
-      } else {
-        throw new Error('Empty file');
-      }
-    } catch (error) {
-      console.warn('Using static reestr data');
-      return STATIC_REESTR;
+  // Static reestr data for TESTING (embedded directly for reliability)
+  const TESTING_REESTR: Record<string, any> = {
+    '5258098350': {
+      status: 'Член СРО',
+      org_name: 'ООО СТК «Грейт»',
+      registration_date: '30.08.2022'
+    },
+    '5249116108': {
+      status: 'Член СРО',
+      org_name: 'ООО СК «СтройМакс»',
+      registration_date: '22.12.2016'
+    },
+    '5249004549': {
+      status: 'Член СРО',
+      org_name: 'ПК «Ремстроймонтаж»',
+      registration_date: '30.03.2017'
+    },
+    '5260344281': {
+      status: 'Член СРО',
+      org_name: 'ООО СМП «СтальМонтаж»',
+      registration_date: '09.11.2016'
+    },
+    '524501693705': {
+      status: 'Член СРО',
+      org_name: 'Полетаев А.В.',
+      registration_date: '02.12.2021'
     }
   };
 
-  // Check if INN exists in local reestr
+  // Check if INN exists (TESTING CLEAN PARSING MODE)
   const checkInnExists = async (inn: string): Promise<{ exists: boolean; data?: any }> => {
-    // Try static data first (immediate availability)
+    console.log(`🔍 === STARTING PARSING TEST for INN: ${inn} ===`);
+
+    // STEP 1: Always try real parsing FIRST
+    console.log('🏄‍♂️ STEP 1: Attempting real Supabase parsing...');
+    console.log('📡 Calling: /api/functions/v1/reestr-parser (proxied to Supabase)');
+    console.log('📨 Request data:', { inn });
+
+    try {
+      const startTime = Date.now();
+      // Get JWT token from Supabase session for authorization
+      let jwt: string | undefined;
+      try {
+        if (supabase.auth) {
+          const { data: { session } } = await supabase.auth.getSession();
+          jwt = session?.access_token;
+        }
+      } catch (error) {
+        console.warn('Failed to get Supabase session:', error);
+      }
+
+      const authHeader = jwt ? `Bearer ${jwt}` : 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+      console.log('🔐 Using Auth Header:', jwt ? '[JWT from session]' : '[Anon key fallback]');
+
+      const response = await fetch(`/api/functions/v1/reestr-parser`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader,
+        },
+        body: JSON.stringify({ inn })
+      });
+      const timeTaken = Date.now() - startTime;
+
+      console.log('📡 RESPONSE in', timeTaken, 'ms');
+      console.log('📡 Supabase response status:', response.status);
+
+      if (!response.ok) {
+        console.log('❌ Supabase returned error status, trying to get error text...');
+        const errorText = await response.text();
+        console.log('❌ Error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('📊 Supabase response data:', data);
+
+      if (data && data.success && data.result) {
+        const result = data.result;
+        console.log('💡 Parsing result found?', result.found);
+
+        if (result.found) {
+          console.log('✅ SUCCESS: INN found via real parsing:', result);
+          return {
+            exists: true,
+            data: {
+              inn,
+              org_name: result.name || '',
+              status: result.status || 'Член СРО',
+              registration_date: result.registrationDate || '',
+              role: 'member'
+            }
+          };
+        } else {
+          console.log('❌ INN confirmed NOT found in real reestr');
+        }
+      } else {
+        console.log('🚨 Response format unexpected - checking fallback');
+      }
+    } catch (error) {
+      console.error('🚨 Real parser ERROR:', error instanceof Error ? error.message : String(error));
+      console.log('🔄 Moving to local fallback...');
+    }
+
+    console.log('📚 STEP 2: Checking local testing reestr...');
+    if (TESTING_REESTR[inn]) {
+      console.log(`📚 FOUND: INN ${inn} in local testing reestr:`, TESTING_REESTR[inn]);
+      return {
+        exists: true,
+        data: {
+          inn,
+          org_name: TESTING_REESTR[inn].org_name,
+          status: TESTING_REESTR[inn].status,
+          registration_date: TESTING_REESTR[inn].registration_date,
+          role: 'member'
+        }
+      };
+    }
+    console.log(`❌ NOT found in local testing reestr`);
+
+    console.log('💾 STEP 3: Checking static data...');
     if (STATIC_REESTR[inn]) {
-      console.log(`INN ${inn} found in static data:`, STATIC_REESTR[inn]);
+      console.log(`💾 FOUND: INN ${inn} in static data:`, STATIC_REESTR[inn]);
       return {
         exists: true,
         data: {
@@ -122,23 +207,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       };
     }
+    console.log(`❌ NOT found in static data`);
 
-    // Fallback to file loading (if file exists and accessible)
-    const reestr = await loadLocalReestr();
+    console.log(`🚫 === FINAL RESULT: INN ${inn} not found anywhere ===`);
 
-    if (reestr[inn]) {
-      console.log(`INN ${inn} found in loaded reestr:`, reestr[inn]);
-      return {
-        exists: true,
-        data: {
-          inn,
-          ...reestr[inn],
-          role: 'member'
-        }
-      };
-    }
-
-    console.log(`INN ${inn} not found`);
     return { exists: false };
   };
 
@@ -156,7 +228,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return true;
     }
 
-    return storedRequests < 3; // Allow 3 requests per day for guests
+  return storedRequests < 1000; // Allow 1000 requests per day for guests (testing)
   };
 
   // Sign in function
@@ -164,7 +236,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Check guest request limits for non-members
       if (!user && !checkGuestLimit()) {
-        showToast('warning', 'Лимит превышен', 'Превышен суточный лимит запросов для гостей (3 запроса). Войдите как член СРО для безлимитного доступа.');
+        showToast('warning', 'Лимит превышен', 'Превышен суточный лимит запросов для гостей (1000 запроса). Войдите как член СРО для безлимитного доступа.');
         return { success: false, message: 'GUEST_LIMIT_EXCEEDED' };
       }
 
@@ -329,31 +401,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setGuestRequestsToday(storedRequests);
         }
 
-        // Check for guest user in localStorage
-        const guestUserData = localStorage.getItem('sro_guest_user');
-        if (guestUserData) {
-          const guestUser = JSON.parse(guestUserData);
-          setUser(guestUser);
-          setLoading(false);
-          return;
-        }
+        // For TESTING: disable user persistence on app restart
+        // Uncomment the line below to enable user persistence
+        // const guestUserData = localStorage.getItem('sro_guest_user');
+        // if (guestUserData) {
+        //   const guestUser = JSON.parse(guestUserData);
+        //   setUser(guestUser);
+        //   setLoading(false);
+        //   return;
+        // }
 
-        // DEVELOPMENT MODE: Auto-login for testing
-        if (process.env.NODE_ENV === 'development') {
-          const testUser: User = {
-            id: 'test-user',
-            email: 'test@sro.local',
-            inn: '1234567890',
-            org_name: 'АО Тестовая Организация',
-            status: 'Активно',
-            registration_date: new Date().toISOString().split('T')[0],
-            role: 'member'
-          };
-          setUser(testUser);
-          localStorage.setItem('sro_guest_user', JSON.stringify(testUser));
-          setLoading(false);
-          return;
-        }
+        // DEVELOPMENT MODE: Auto-login disabled for testing
+        // if (process.env.NODE_ENV === 'development') {
+        //   const testUser: User = {
+        //     id: 'test-user',
+        //     email: 'test@sro.local',
+        //     inn: '1234567890',
+        //     org_name: 'АО Тестовая Организация',
+        //     status: 'Активно',
+        //     registration_date: new Date().toISOString().split('T')[0],
+        //     role: 'member'
+        //   };
+        //   setUser(testUser);
+        //   localStorage.setItem('sro_guest_user', JSON.stringify(testUser));
+        //   setLoading(false);
+        //   return;
+        // }
 
         // Check for real auth session
         if (supabase.auth) {
