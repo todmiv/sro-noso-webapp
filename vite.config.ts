@@ -25,10 +25,14 @@ export default defineConfig({
     }
   },
   build: {
+    base: process.env.GITHUB_ACTIONS ? '/sro-noso-webapp/' : '/sro-noso-webapp/',
     rollupOptions: {
       output: {
-        manualChunks: undefined,
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          supabase: ['@supabase/supabase-js']
+        },
       },
     },
   },
-})
