@@ -82,30 +82,50 @@ Deno.serve(async (req: Request): Promise<Response> => {
       found: false
     }
 
-    // Ищем данные в HTML
-    // Поиск по паттернам в HTML коде сайта СРО
+    console.log('HTML preview (first 1000 chars):', html.substring(0, 1000))
 
-    // 1. Проверяем, найдена ли организация (ищем фразы об отсутствии результатов)
-    if (html.includes('ничего не найдено') || html.includes('ничего не найдено') ||
-        html.includes('Нет элементов для отображения')) {
+    // Ищем данные в HTML
+    // Расширенный поиск по паттернам об отсутствии результатов
+    const noResultsPatterns = [
+      'ничего не найдено',
+      'Не найдены элементы',
+      'Нет элементов для отображения',
+      'Результатов не найдено',
+      'не найдено',
+      'По вашему запросу ничего не найдено'
+    ]
+
+    const hasNoResults = noResultsPatterns.some(pattern =>
+      html.toLowerCase().includes(pattern.toLowerCase())
+    )
+
+    if (hasNoResults) {
       result.found = false
       result.status = 'Не найдена в реестре СРО'
     } else {
-      // 2. Ищем таблицу с результатами поиска
+      // Ищем таблицу с результатами поиска
       const tableMatch = html.match(/<table[^>]*>[\s\S]*?<\/table>/i);
 
       if (tableMatch) {
-        result.found = true
-        result.status = 'Найдена в реестре СРО'
-
-        // 3. Пытаемся извлечь информацию из таблицы
+        // Проверяем, есть ли данные в таблице (ищем td с содержимым)
         const rowMatch = html.match(/<td[^>]*>([^<]*?)<\/td>/gi);
-        if (rowMatch && rowMatch.length >= 2) {
-          // Попытка извлечь данные из первой строки результатов
-          const cells = rowMatch.slice(0, 5) // берем первые 5 ячеек
+        const hasData = rowMatch && rowMatch.length >= 2 &&
+                        rowMatch.some(cell => cell.replace(/<[^>]*>/g, '').trim().length > 0)
 
-          result.name = cells[0]?.replace(/<[^>]*>/g, '').trim() || ''
-          result.registrationDate = cells[3]?.replace(/<[^>]*>/g, '').trim() || ''
+        if (hasData) {
+          result.found = true
+          result.status = 'Найдена в реестре СРО'
+
+          // Пытаемся извлечь информацию из таблицы
+          const cells = rowMatch.slice(0, 5).map(cell =>
+            cell?.replace(/<[^>]*>/g, '').trim() || ''
+          )
+
+          result.name = cells[0] || ''
+          result.registrationDate = cells[3] || ''
+        } else {
+          result.found = false
+          result.status = 'Не найдена в реестре СРО'
         }
       } else {
         result.found = false
