@@ -33,6 +33,7 @@ const ChatAgentPage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showHistoryMode, setShowHistoryMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -46,6 +47,15 @@ const ChatAgentPage = () => {
   const resetChat = () => {
     setMessages([]);
     setInputValue('');
+    setShowHistoryMode(false);
+  };
+
+  const showChatHistory = () => {
+    setShowHistoryMode(true);
+  };
+
+  const hideChatHistory = () => {
+    setShowHistoryMode(false);
   };
 
   const sendMessage = async () => {
@@ -139,7 +149,7 @@ const ChatAgentPage = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4-4-4z"/>
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">ИИ-Ассистент по документам СРО</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">ИИ-Консультант по документам СРО</h1>
           <p className="text-gray-600">Задайте вопрос по документам саморегулируемой организации</p>
         </div>
 
@@ -193,6 +203,54 @@ const ChatAgentPage = () => {
 
         {/* Chat container */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          {/* History navigation */}
+          {messages.length > 0 && (
+            <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={showChatHistory}
+                    className="text-sm text-gray-600 hover:text-blue-600 flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    История чата ({messages.length} сообщений)
+                  </button>
+
+                  {showHistoryMode && (
+                    <button
+                      onClick={hideChatHistory}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      Скрыть историю
+                    </button>
+                  )}
+                </div>
+
+                <span className="text-sm text-gray-500">
+                  Сессия активна
+                </span>
+              </div>
+
+              {showHistoryMode && (
+                <div className="mt-2 flex space-x-2 text-sm">
+                  <button
+                    className="text-blue-600 hover:text-blue-800 underline"
+                    onClick={() => document.querySelector('.h-96')?.scrollTo({ top: 0, behavior: 'smooth' })}
+                  >
+                    ↑ К началу
+                  </button>
+                  <button
+                    className="text-blue-600 hover:text-blue-800 underline"
+                    onClick={() => scrollToBottom()}
+                  >
+                    ↓ К концу
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           {/* Messages */}
           <div className="h-96 overflow-y-auto p-4 space-y-4">
             {messages.map((message) => (
@@ -272,12 +330,7 @@ const ChatAgentPage = () => {
           </div>
         </div>
 
-        {/* Back button */}
-        <div className="text-center mt-6">
-          <button onClick={resetChat} className="text-blue-600 hover:text-blue-800 underline">
-            Вернуться к вопросам
-          </button>
-        </div>
+        {/* Back button - removed by request */}
       </div>
     </div>
   );

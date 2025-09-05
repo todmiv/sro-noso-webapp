@@ -35,7 +35,7 @@ const Header = () => {
       )
     },
     {
-      name: 'ИИ-консультант',
+      name: 'ИИ-Консультант',
       path: '/chat',
       icon: (
         <svg className="icon-standard" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
