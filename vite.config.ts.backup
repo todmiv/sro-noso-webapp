@@ -9,15 +9,15 @@ export default defineConfig({
       '/api/functions': {
         target: 'http://127.0.0.1:54321',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/functions/, '/functions'),
-        configure: (proxy, options) => {
-          proxy.on('error', (err, req, res) => {
+        rewrite: (path: string) => path.replace(/^\/api\/functions/, '/functions'),
+        configure: (proxy: any, options: any) => {
+          proxy.on('error', (err: any, req: any, res: any) => {
             console.log('proxy error', err);
           });
-          proxy.on('proxyReq', (proxyReq, req, res) => {
+          proxy.on('proxyReq', (proxyReq: any, req: any, res: any) => {
             console.log('Sending Request to the Target:', req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
+          proxy.on('proxyRes', (proxyRes: any, req: any, res: any) => {
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
           });
         }
@@ -36,3 +36,4 @@ export default defineConfig({
       },
     },
   },
+})+++++++ REPLACE

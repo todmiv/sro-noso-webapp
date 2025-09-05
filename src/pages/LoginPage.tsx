@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
@@ -93,9 +93,9 @@ const LoginPage = () => {
         </form>
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>Еще не являетесь членом СРО?</p>
-          <a href="https://www.sronoso.ru/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">
-            Подробнее о вступлении
-          </a>
+          <Link to="/chat" className="text-blue-600 hover:underline font-medium">
+            Получите бесплатную консультацию
+          </Link>
         </div>
       </div>
     </div>

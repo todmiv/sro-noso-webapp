@@ -9,12 +9,12 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Контактная информация</h3>
             <p className="mb-2"><strong>Телефоны:</strong></p>
             <p className="mb-1">+7 (831) 433-15-27</p>
-            <p className="mb-1">+7 (831) 419-72-25</p>
-            <p className="mb-3"><strong>Многоканальный телефон:</strong> +7 (495) 775 81 11</p>
-            <p className="mb-2"><strong>Телефон доверия:</strong></p>
-            <p className="mb-1">+7 (910) 139 17 62</p>
-            <p className="mb-4">+7 (905) 757 66 99</p>
-            <p><strong>E-mail:</strong> <a href="mailto:info@sronoso.ru" className="text-blue-300 hover:text-white hover:underline">info@sronoso.ru</a></p>
+            <p className="mb-4">+7 (831) 419-72-25</p>
+            <p className="mb-2"><strong>Email:</strong></p>
+            <p className="mb-1"><a href="mailto:dsrpkkov.noso@mail.ru" className="text-blue-300 hover:text-white hover:underline">dsrpkkov.noso@mail.ru</a></p>
+            <p className="mb-2"><a href="mailto:4331527@mail.ru" className="text-blue-300 hover:text-white hover:underline">4331527@mail.ru</a></p>
+            <p className="mb-2"><strong>Время работы:</strong></p>
+            <p>Понедельник - пятница: 09:00 - 17:00</p>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-4">Руководство СРО</h3>
