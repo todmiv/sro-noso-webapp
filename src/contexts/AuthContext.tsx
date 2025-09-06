@@ -182,7 +182,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       // No header for localhost to bypass Supabase auth
 
-      const response = await fetch(`/supabase/functions/v1/reestr-parser`, {
+      // For local development, use direct Supabase URL
+      const parserUrl = window.location.hostname.includes('localhost')
+        ? 'http://127.0.0.1:54321/functions/v1/reestr-parser'
+        : '/supabase/functions/v1/reestr-parser';
+
+      const response = await fetch(parserUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({ inn })
@@ -323,12 +328,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log(`🧪 === TESTING PARSER FOR INN: ${inn} ===`);
 
     try {
-      const response = await fetch(`/supabase/functions/v1/reestr-parser`, {
+      // For local development, use direct Supabase URL
+      const parserUrl = window.location.hostname.includes('localhost')
+        ? 'http://127.0.0.1:54321/functions/v1/reestr-parser'
+        : '/supabase/functions/v1/reestr-parser';
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add Authorization for production only
+      if (!window.location.hostname.includes('localhost')) {
+        headers['Authorization'] = `Bearer ${supabaseKey}`;
+      }
+
+      const response = await fetch(parserUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseKey}`,
-        },
+        headers,
         body: JSON.stringify({ inn })
       });
 
@@ -432,7 +448,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Production mode: header required for Supabase function
 
       console.log('🌐 Calling parser function...');
-      const response = await fetch(`/supabase/functions/v1/reestr-parser`, {
+      // For local development, use direct Supabase URL
+      const parserUrl = window.location.hostname.includes('localhost')
+        ? 'http://127.0.0.1:54321/functions/v1/reestr-parser'
+        : '/supabase/functions/v1/reestr-parser';
+
+      const response = await fetch(parserUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({ inn })
