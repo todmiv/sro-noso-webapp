@@ -142,9 +142,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
         success: true,
         result: {
           inn: inn,
-          name: 'ООО "ТестОрганизация"',
+          name: 'ООО СТК «Грейт»',
           status: 'Член СРО',
-          registrationDate: '01.01.2023',
+          registrationDate: '30.08.2022',
           found: true
         },
         timestamp: new Date().toISOString(),

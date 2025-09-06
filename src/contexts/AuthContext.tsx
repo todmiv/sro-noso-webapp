@@ -518,13 +518,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = data.result;
       console.log('✅ Parser found data:', result);
 
-      // Validate data
+      // Validate data - updated validation logic
       const isValidData = result.name &&
         !result.name.includes('Краткое наименование') &&
         !result.name.includes('-ошибка') &&
         !result.registrationDate?.includes('Исключен') &&
-        !result.status?.includes('Член СРО') &&
-        result.registrationDate !== result.status;
+        result.status && // Status must exist
+        result.registrationDate && // Registration date must exist
+        result.registrationDate !== result.status; // Date should not equal status
 
       if (!isValidData) {
         console.log('⚠️ Parser returned invalid data');
