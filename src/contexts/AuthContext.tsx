@@ -10,7 +10,16 @@ export interface User {
   status: string;
   registration_date: string;
   role: 'guest' | 'member';
+  dataSource?: 'website' | 'local';
 }
+
+export interface LocalRegistryEntry {
+  status: string;
+  org_name: string;
+  registration_date: string;
+}
+
+export type LocalRegistry = Record<string, LocalRegistryEntry>;
 
 interface AuthContextType {
   user: User | null;
@@ -19,8 +28,14 @@ interface AuthContextType {
   signIn: (inn: string) => Promise<{ success: boolean; message?: string }>;
   signOut: () => Promise<void>;
   checkInnExists: (inn: string) => Promise<{ exists: boolean; data?: any }>;
+  testParser: (inn: string) => Promise<{ success: boolean; data?: any; error?: string }>;
   guestRequestsToday: number;
   checkGuestLimit: () => boolean;
+  verificationStatus: {
+    isChecking: boolean;
+    currentStep: string;
+    dataSource: 'website' | 'local' | null;
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -104,18 +119,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Check if INN exists (TESTING CLEAN PARSING MODE)
-  const checkInnExists = async (inn: string): Promise<{ exists: boolean; data?: any }> => {
-    console.log(`🔍 === STARTING PARSING TEST for INN: ${inn} ===`);
+  // State for local registry
+  const [localRegistry, setLocalRegistry] = useState<LocalRegistry>({});
+  const [registryLoaded, setRegistryLoaded] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState({
+    isChecking: false,
+    currentStep: '',
+    dataSource: null as 'website' | 'local' | null,
+  });
 
-    // STEP 1: Always try real parsing FIRST
-    console.log('🏄‍♂️ STEP 1: Attempting real Supabase parsing...');
-    console.log('📡 Calling: /api/functions/v1/reestr-parser (proxied to Supabase)');
-    console.log('📨 Request data:', { inn });
+  // Load local registry from JSON file
+  const loadLocalRegistry = async (): Promise<string> => {
+    try {
+      const response = await fetch('/reestr.json');
+      if (!response.ok) {
+        throw new Error(`Failed to load registry: ${response.status}`);
+      }
+      const data: LocalRegistry = await response.json();
+      console.log('✅ Local registry loaded successfully');
+      setLocalRegistry(data);
+      setRegistryLoaded(true);
+      return 'Registry loaded successfully';
+    } catch (error) {
+      console.error('❌ Failed to load local registry:', error);
+      return `Error loading registry: ${error instanceof Error ? error.message : String(error)}`;
+    }
+  };
+
+  // Update local registry entry
+  const updateLocalRegistry = (inn: string, data: LocalRegistryEntry): void => {
+    const updatedRegistry = {
+      ...localRegistry,
+      [inn]: data
+    };
+    setLocalRegistry(updatedRegistry);
+    console.log(`📝 Local registry updated for INN ${inn}:`, data);
+  };
+
+  // Check if INN exists with integrated local registry
+  const checkInnExists = async (inn: string): Promise<{ exists: boolean; data?: any; dataSource?: 'website' | 'local' | null }> => {
+    console.log(`🔍 === CHECKING INN: ${inn} ===`);
+
+    let siteData = null;
+    let siteAvailable = false;
+    let dataSource: 'website' | 'local' | null = null;
+
+    // STEP 1: Try to get data from site (Supabase function)
+    setVerificationStatus({ isChecking: true, currentStep: 'Проверка на сайте реестра СРО НОСО...', dataSource: 'website' });
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second for first step
+
+    console.log('🌐 STEP 1: Attempting to get data from site...');
 
     try {
       const startTime = Date.now();
-      // Get JWT token from Supabase session for authorization
       let jwt: string | undefined;
       try {
         if (supabase.auth) {
@@ -126,92 +182,202 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.warn('Failed to get Supabase session:', error);
       }
 
-      const authHeader = jwt ? `Bearer ${jwt}` : 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
-      console.log('🔐 Using Auth Header:', jwt ? '[JWT from session]' : '[Anon key fallback]');
+      // Try with Supabase anon key from environment
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
 
-      const response = await fetch(`/api/functions/v1/reestr-parser`, {
+      // Skip auth completely for localhost testing
+      if (!window.location.hostname.includes('localhost')) {
+        headers['Authorization'] = `Bearer ${supabaseKey}`;
+      }
+      // No header for localhost to bypass Supabase auth
+
+      const response = await fetch(`/supabase/functions/v1/reestr-parser`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': authHeader,
-        },
+        headers,
         body: JSON.stringify({ inn })
       });
       const timeTaken = Date.now() - startTime;
 
-      console.log('📡 RESPONSE in', timeTaken, 'ms');
-      console.log('📡 Supabase response status:', response.status);
+      console.log('📡 Site response in', timeTaken, 'ms, status:', response.status);
 
-      if (!response.ok) {
-        console.log('❌ Supabase returned error status, trying to get error text...');
-        const errorText = await response.text();
-        console.log('❌ Error response:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 Site response data:', data);
+
+        if (data && data.success && data.result) {
+          const result = data.result;
+          siteAvailable = true;
+
+          if (result.found) {
+            // Проверяем корректность данных парсера
+            console.log('🔍 Checking parser data validity:');
+            console.log('- name:', result.name);
+            console.log('- status:', result.status);
+            console.log('- registrationDate:', result.registrationDate);
+
+            const isValidData =
+              result.name &&
+              !result.name.includes('Краткое наименование') &&
+              !result.name.includes('-ошибка') &&
+              !result.registrationDate?.includes('Исключен') &&
+              !result.status?.includes('Член СРО') &&
+              result.registrationDate !== result.status;
+
+            console.log('📋 Validation results:');
+            console.log('- Has name:', !!result.name);
+            console.log('- No "Краткое наименование":', !result.name?.includes('Краткое наименование'));
+            console.log('- No "-ошибка":', !result.name?.includes('-ошибка'));
+            console.log('- Registration date != "Исключен":', !result.registrationDate?.includes('Исключен'));
+            console.log('- Status != "Член СРО":', !result.status?.includes('Член СРО'));
+            console.log('- Registration date != Status:', result.registrationDate !== result.status);
+            console.log('- Overall valid:', isValidData);
+
+            if (isValidData) {
+              siteData = {
+                inn,
+                org_name: result.name || '',
+                status: result.status || 'Член СРО',
+                registration_date: result.registrationDate || ''
+              };
+              console.log('✅ Valid data found on site:', siteData);
+              // STEP 2: Check and update local registry
+              await syncWithLocalRegistry(inn, siteData);
+            } else {
+              console.log('⚠️ Parser returned invalid data, using local registry instead');
+              siteAvailable = false; // Принудительно отключаем использование сайта
+            }
+          } else {
+            console.log('❌ Not found on site');
+          }
+        }
+      } else {
+        console.log('❌ Site returned error status:', response.status);
       }
+    } catch (error) {
+      console.error('🚨 Site request failed:', error instanceof Error ? error.message : String(error));
+      siteAvailable = false;
+    }
 
-      const data = await response.json();
-      console.log('📊 Supabase response data:', data);
+    // STEP 3: Use local registry if site data not found or site unavailable
+    if (siteAvailable && siteData) {
+      console.log('🚀 Using fresh site data');
+      return {
+        exists: true,
+        data: { ...siteData, role: 'member' },
+        dataSource: 'website' as const
+      };
+    }
 
-      if (data && data.success && data.result) {
-        const result = data.result;
-        console.log('💡 Parsing result found?', result.found);
+    // Check local registry
+    setVerificationStatus({ isChecking: true, currentStep: 'Проверка локального реестра СРО НОСО...', dataSource: 'local' });
+    await new Promise(resolve => setTimeout(resolve, 3000)); // 3 seconds for local registry check
 
-        if (result.found) {
-          console.log('✅ SUCCESS: INN found via real parsing:', result);
-          return {
-            exists: true,
-            data: {
+    console.log('🏠 STEP 3: Checking local registry...');
+    if (registryLoaded && localRegistry[inn]) {
+      const localData = localRegistry[inn];
+      console.log('✅ Found in local registry:', localData);
+      return {
+        exists: true,
+        data: { inn, ...localData, role: 'member' },
+        dataSource: 'local' as const
+      };
+    }
+
+    console.log(`❌ INN ${inn} not found anywhere`);
+    setVerificationStatus({ isChecking: false, currentStep: '', dataSource: null });
+    return {
+      exists: false,
+      dataSource: null
+    };
+  };
+
+  // Sync site data with local registry
+  const syncWithLocalRegistry = async (inn: string, siteData: any): Promise<void> => {
+    if (!registryLoaded) {
+      console.log('⚠️ Local registry not loaded yet');
+      return;
+    }
+
+    const localEntry = localRegistry[inn];
+    const siteEntry = {
+      status: siteData.status,
+      org_name: siteData.org_name,
+      registration_date: siteData.registration_date
+    };
+
+    if (!localEntry) {
+      // Add to local registry if not exists
+      console.log(`➕ Adding ${inn} to local registry`);
+      updateLocalRegistry(inn, siteEntry);
+    } else {
+      // Check if data differs and update if needed
+      const localString = JSON.stringify({
+        status: localEntry.status,
+        org_name: localEntry.org_name,
+        registration_date: localEntry.registration_date
+      });
+      const siteString = JSON.stringify(siteEntry);
+
+      if (localString !== siteString) {
+        console.log(`🔄 Updating ${inn} in local registry (data differs)`);
+        updateLocalRegistry(inn, siteEntry);
+      } else {
+        console.log(`✅ Local registry data matches site data for ${inn}`);
+      }
+    }
+  };
+
+  // Test parser function separately (without fallback to local registry)
+  const testParser = async (inn: string): Promise<{ success: boolean; data?: any; error?: string }> => {
+    console.log(`🧪 === TESTING PARSER FOR INN: ${inn} ===`);
+
+    try {
+      const response = await fetch(`/supabase/functions/v1/reestr-parser`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({ inn })
+      });
+
+      console.log('📡 Parser response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 Parser raw response:', data);
+
+        if (data && data.success && data.result) {
+          const result = data.result;
+
+          if (result.found) {
+            const parsedData = {
               inn,
               org_name: result.name || '',
               status: result.status || 'Член СРО',
-              registration_date: result.registrationDate || '',
-              role: 'member'
-            }
-          };
+              registration_date: result.registrationDate || ''
+            };
+
+            console.log('✅ Parser extracted data:', parsedData);
+            return { success: true, data: parsedData };
+          } else {
+            return { success: false, error: 'ИНН не найден на сайте' };
+          }
         } else {
-          console.log('❌ INN confirmed NOT found in real reestr');
+          return { success: false, error: 'Неверный формат ответа от парсера' };
         }
       } else {
-        console.log('🚨 Response format unexpected - checking fallback');
+        return { success: false, error: `HTTP ${response.status}: ${response.statusText}` };
       }
     } catch (error) {
-      console.error('🚨 Real parser ERROR:', error instanceof Error ? error.message : String(error));
-      console.log('🔄 Moving to local fallback...');
-    }
-
-    console.log('📚 STEP 2: Checking local testing reestr...');
-    if (TESTING_REESTR[inn]) {
-      console.log(`📚 FOUND: INN ${inn} in local testing reestr:`, TESTING_REESTR[inn]);
+      console.error('🚨 Parser test failed:', error);
       return {
-        exists: true,
-        data: {
-          inn,
-          org_name: TESTING_REESTR[inn].org_name,
-          status: TESTING_REESTR[inn].status,
-          registration_date: TESTING_REESTR[inn].registration_date,
-          role: 'member'
-        }
+        success: false,
+        error: `Ошибка сети: ${error instanceof Error ? error.message : String(error)}`
       };
     }
-    console.log(`❌ NOT found in local testing reestr`);
-
-    console.log('💾 STEP 3: Checking static data...');
-    if (STATIC_REESTR[inn]) {
-      console.log(`💾 FOUND: INN ${inn} in static data:`, STATIC_REESTR[inn]);
-      return {
-        exists: true,
-        data: {
-          inn,
-          ...STATIC_REESTR[inn],
-          role: 'member'
-        }
-      };
-    }
-    console.log(`❌ NOT found in static data`);
-
-    console.log(`🚫 === FINAL RESULT: INN ${inn} not found anywhere ===`);
-
-    return { exists: false };
   };
 
   // Check guest request limits
@@ -251,119 +417,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!innCheck.exists) {
         showToast('error', 'ИНН не найден', 'Введенный ИНН не найден в реестре СРО');
+        setVerificationStatus({ isChecking: false, currentStep: '', dataSource: null });
         return { success: false, message: 'INN_NOT_FOUND' };
       }
 
-      // Create guest user for MVP (when Supabase is not configured as a fallback)
-      if (!supabaseUrl || !supabaseKey) {
-        console.log('Using guest user authentication');
-        const guestUser: User = {
-          id: `guest-${Date.now()}`,
-          email: `${inn}@guest.sro`,
-          inn: innCheck.data.inn,
-          org_name: innCheck.data.org_name,
-          status: innCheck.data.status,
-          registration_date: innCheck.data.registration_date,
-          role: 'member' // In MVP, all valid INN users are treated as members
-        };
+      // For testing/development - use mock authentication
+      console.log('Using mock authentication for testing');
+      const mockUser: User = {
+        id: `guest-${Date.now()}`,
+        email: `${inn}@guest.sro`,
+        inn: innCheck.data.inn,
+        org_name: innCheck.data.org_name,
+        status: innCheck.data.status,
+        registration_date: innCheck.data.registration_date,
+        role: 'member',
+        dataSource: innCheck.dataSource
+      } as User;
 
-        setUser(guestUser);
-        localStorage.setItem('sro_guest_user', JSON.stringify(guestUser));
+      setUser(mockUser);
+      localStorage.setItem('sro_guest_user', JSON.stringify(mockUser));
+      setVerificationStatus({ isChecking: false, currentStep: '', dataSource: null });
 
-        showToast('success', 'Успешный вход', `Добро пожаловать, ${innCheck.data.org_name}`);
-        return { success: true };
-      }
-
-      // Real Supabase authentication (only if we have a valid client)
-      if (supabase.auth) {
-        const tempEmail = `${inn}@sro.temp`;
-        const tempPassword = inn; // Use INN as password for MVP
-
-        try {
-          // Try to sign up first
-          const { data, error } = await supabase.auth.signUp({
-            email: tempEmail,
-            password: tempPassword,
-            options: {
-              data: {
-                inn,
-                org_name: innCheck.data.org_name,
-                status: innCheck.data.status,
-                registration_date: innCheck.data.registration_date
-              }
-            }
-          });
-
-          if (!error) {
-            // New user created successfully
-            if (data.user) {
-              const userData: User = {
-                id: data.user.id,
-                email: data.user.email || '',
-                inn: innCheck.data.inn,
-                org_name: innCheck.data.org_name,
-                status: innCheck.data.status,
-                registration_date: innCheck.data.registration_date,
-                role: 'member'
-              };
-
-              setUser(userData);
-              showToast('success', 'Регистрация успешна', `Добро пожаловать, ${innCheck.data.org_name}!`);
-              return { success: true };
-            }
-          } else if (error.message.includes('already registered')) {
-            // User exists, try to sign in
-            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-              email: tempEmail,
-              password: tempPassword
-            });
-
-            if (!signInError && signInData.user) {
-              const userData: User = {
-                id: signInData.user.id,
-                email: signInData.user.email || '',
-                inn: innCheck.data.inn,
-                org_name: innCheck.data.org_name,
-                status: innCheck.data.status,
-                registration_date: innCheck.data.registration_date,
-                role: 'member'
-              };
-
-              setUser(userData);
-              showToast('success', 'Успешный вход', `Добро пожаловать, ${innCheck.data.org_name}`);
-              return { success: true };
-            }
-          }
-
-          console.error('Authentication error:', error);
-          showToast('error', 'Ошибка аутентификации', 'Не удалось выполнить вход');
-          return { success: false, message: 'AUTH_FAILED' };
-
-        } catch (error) {
-          console.error('Supabase auth error:', error);
-          showToast('error', 'Ошибка', 'Сервис аутентификации временно недоступен');
-          return { success: false, message: 'SERVICE_UNAVAILABLE' };
-        }
-
-      } else {
-        console.log('Supabase client not available, using mock authentication');
-        // Fallback mock authentication
-        const guestUser: User = {
-          id: `guest-${Date.now()}`,
-          email: `${inn}@guest.sro`,
-          inn: innCheck.data.inn,
-          org_name: innCheck.data.org_name,
-          status: innCheck.data.status,
-          registration_date: innCheck.data.registration_date,
-          role: 'member'
-        };
-
-        setUser(guestUser);
-        localStorage.setItem('sro_guest_user', JSON.stringify(guestUser));
-
-        showToast('success', 'Успешный вход', `Добро пожаловать, ${innCheck.data.org_name}`);
-        return { success: true };
-      }
+      showToast('success', 'Успешный вход', `Добро пожаловать, ${innCheck.data.org_name}`);
+      return { success: true };
 
     } catch (error) {
       console.error('Sign in error:', error);
@@ -389,10 +465,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Load user on app startup
+  // Load registry and user on app startup
   useEffect(() => {
-    const loadUser = async () => {
+    const loadData = async () => {
       try {
+        // Load local registry
+        await loadLocalRegistry();
+
         // Load guest request count
         const today = new Date().toDateString();
         const lastRequestDate = localStorage.getItem('sro_guest_last_request');
@@ -453,7 +532,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     };
 
-    loadUser();
+    loadData();
 
     // Listen for auth state changes
     if (supabase.auth) {
@@ -490,8 +569,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signIn,
     signOut,
     checkInnExists,
+    testParser,
     guestRequestsToday,
-    checkGuestLimit
+    checkGuestLimit,
+    verificationStatus
   };
 
   return (

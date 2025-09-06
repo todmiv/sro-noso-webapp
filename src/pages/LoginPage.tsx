@@ -12,7 +12,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn } = useAuth();
+  const { signIn, verificationStatus } = useAuth();
 
   // Определяем, куда перенаправить после успешного входа
   const from = location.state?.from?.pathname || '/documents';
@@ -91,6 +91,44 @@ const LoginPage = () => {
             </button>
           </div>
         </form>
+
+        {/* Verification Status Display */}
+        {verificationStatus.isChecking && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+            <span className="text-blue-800 text-sm font-medium">
+              {verificationStatus.currentStep}
+            </span>
+          </div>
+        )}
+
+        {/* Success/Error Status Display */}
+        {verificationStatus.currentStep && !verificationStatus.isChecking && (
+          <div className={`mt-4 p-3 border rounded-lg flex items-center ${
+            verificationStatus.dataSource ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+          }`}>
+            {verificationStatus.dataSource ? (
+              <>
+                <svg className="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span className="text-green-800 text-sm font-medium">
+                  Данные найдены успешно
+                </span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                <span className="text-red-800 text-sm font-medium">
+                  Данные не найдены
+                </span>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>Еще не являетесь членом СРО?</p>
           <Link to="/chat" className="text-blue-600 hover:underline font-medium">

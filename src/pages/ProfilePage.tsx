@@ -86,7 +86,10 @@ const ProfilePage = () => {
                 <label className="text-sm font-medium text-gray-700">Статус членства</label>
               </div>
               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(user.status)}`}>
-                {user.status}
+                {user.status === 'Найдена в реестре СРО' ? 'Член СРО' :
+                 user.status === 'Исключен' ? 'Исключен из СРО' :
+                 user.status?.includes('Исключен') ? 'Исключен из СРО' :
+                 user.status}
               </div>
             </div>
 
@@ -97,7 +100,12 @@ const ProfilePage = () => {
                 </svg>
                 <label className="text-sm font-medium text-gray-700">Название организации</label>
               </div>
-              <p className="text-gray-900 font-medium">{user.org_name}</p>
+              <p className="text-gray-900 font-medium">
+                {user.org_name === 'Краткое наименование организации:' ||
+                 user.org_name?.startsWith('Краткое наименование организации:') ?
+                 'Информация временно недоступна (парсер сайта требует настройки)' :
+                 user.org_name || 'Информация временно недоступна'}
+              </p>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
@@ -120,8 +128,30 @@ const ProfilePage = () => {
                 </svg>
                 <label className="text-sm font-medium text-gray-700">Дата регистрации</label>
               </div>
-              <p className="text-gray-900">{user.registration_date}</p>
+              <p className="text-gray-900">
+                {user.registration_date?.startsWith('Исключен') ?
+                 'Информация временно недоступна' :
+                 user.registration_date?.includes('- ошибка') ?
+                 user.registration_date.replace('- ошибка', '').trim() :
+                 user.registration_date || 'Информация временно недоступна'}
+              </p>
             </div>
+          </div>
+
+          {/* Data Source Info */}
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center mb-2">
+              <svg className="icon-standard text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <label className="text-sm font-medium text-blue-800">Источник данных</label>
+            </div>
+            <p className="text-blue-900">
+              Вход выполнен по данным{' '}
+              <span className="font-semibold">
+                {user.dataSource === 'website' ? 'с официального сайта СРО НОСО' : 'локального реестра'}
+              </span>
+            </p>
           </div>
         </div>
 
