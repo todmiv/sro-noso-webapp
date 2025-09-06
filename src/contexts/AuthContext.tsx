@@ -25,9 +25,9 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   supabase: SupabaseClient;
-  signIn: (inn: string) => Promise<{ success: boolean; message?: string }>;
+  signIn: (inn: string) => Promise<{ success: boolean; message?: string; showRetryButtons?: boolean }>;
   signOut: () => Promise<void>;
-  checkInnExists: (inn: string) => Promise<{ exists: boolean; data?: any }>;
+  checkInnExists: (inn: string) => Promise<{ exists: boolean; data?: any; dataSource?: 'website' | 'local' | null }>;
   testParser: (inn: string) => Promise<{ success: boolean; data?: any; error?: string }>;
   guestRequestsToday: number;
   checkGuestLimit: () => boolean;
@@ -36,6 +36,12 @@ interface AuthContextType {
     currentStep: string;
     dataSource: 'website' | 'local' | null;
   };
+  loginError: {
+    message: string;
+    showRetryButtons: boolean;
+  } | null;
+  clearLoginError: () => void;
+  setLoginError: (error: { message: string; showRetryButtons: boolean } | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -68,6 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [guestRequestsToday, setGuestRequestsToday] = useState(0);
+  const [loginError, setLoginError] = useState<{ message: string; showRetryButtons: boolean } | null>(null);
   const { showToast } = useToast();
 
   // Static reestr data for MVP
@@ -406,12 +413,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return storedRequests < 1000; // Allow 1000 requests per day for guests (testing)
   };
 
-  // Sign in function
-  const signIn = async (inn: string): Promise<{ success: boolean; message?: string }> => {
+  // Sign in function - ONLY use parser, no fallback to local registry
+  const signIn = async (inn: string): Promise<{ success: boolean; message?: string; showRetryButtons?: boolean }> => {
     try {
+      console.log(`🚪 Sign in attempt for INN: ${inn}`);
+
       // Check guest request limits for non-members
       if (!user && !checkGuestLimit()) {
         showToast('warning', 'Лимит превышен', 'Превышен суточный лимит запросов для гостей (1000 запроса). Войдите как член СРО для безлимитного доступа.');
+        setLoginError({
+          message: 'Превышен суточный лимит запросов для гостей (1000 запроса). Войдите как член СРО для безлимитного доступа.',
+          showRetryButtons: false
+        });
         return { success: false, message: 'GUEST_LIMIT_EXCEEDED' };
       }
 
@@ -422,38 +435,139 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setGuestRequestsToday(currentRequests + 1);
       }
 
-      const innCheck = await checkInnExists(inn);
+      // STEP 1: Direct call to parser only (no fallback)
+      const startTime = Date.now();
+      let jwt: string | undefined;
 
-      if (!innCheck.exists) {
-        showToast('error', 'ИНН не найден', 'Введенный ИНН не найден в реестре СРО');
-        setVerificationStatus({ isChecking: false, currentStep: '', dataSource: null });
-        return { success: false, message: 'INN_NOT_FOUND' };
+      try {
+        if (supabase.auth) {
+          const { data: { session } } = await supabase.auth.getSession();
+          jwt = session?.access_token;
+        }
+      } catch (error) {
+        console.warn('Failed to get Supabase session:', error);
       }
 
-      // For testing/development - use mock authentication
-      console.log('Using mock authentication for testing');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // For prod, use real keys; for local, no auth (mock mode)
+      if (!window.location.hostname.includes('localhost')) {
+        headers['Authorization'] = `Bearer ${supabaseKey}`;
+      }
+
+      console.log('🌐 Calling parser function...');
+      const response = await fetch(`/supabase/functions/v1/reestr-parser`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ inn })
+      });
+
+      const timeTaken = Date.now() - startTime;
+      console.log(`⏱️ Parser response in ${timeTaken}ms, status: ${response.status}`);
+
+      if (!response.ok) {
+        console.log(`❌ Parser error status: ${response.status}`);
+
+        // Show retry buttons for server errors
+        if (response.status >= 500) {
+          const errorMessage = 'Не удалось получить ваши данные с сайта. Попробуйте ещё раз.';
+          setLoginError({
+            message: errorMessage,
+            showRetryButtons: true
+          });
+          return {
+            success: false,
+            message: errorMessage,
+            showRetryButtons: true
+          };
+        }
+
+        const errorMessage = 'Ошибка сервера';
+        setLoginError({
+          message: errorMessage,
+          showRetryButtons: false
+        });
+        return { success: false, message: errorMessage };
+      }
+
+      // Parse response
+      const data = await response.json();
+      console.log('📊 Parser response:', data);
+
+      if (!data.success) {
+        console.log('❌ Parser returned success: false');
+        return {
+          success: false,
+          message: 'Не удалось получить ваши данные с сайта. Попробуйте ещё раз.',
+          showRetryButtons: true
+        };
+      }
+
+      if (!data.result || !data.result.found) {
+        console.log('❌ Parser returned no data');
+        const errorMessage = 'ИНН не найден в реестре СРО';
+        setLoginError({
+          message: errorMessage,
+          showRetryButtons: false // Пользователь должен изменить ИНН
+        });
+        return { success: false, message: errorMessage };
+      }
+
+      const result = data.result;
+      console.log('✅ Parser found data:', result);
+
+      // Validate data
+      const isValidData = result.name &&
+        !result.name.includes('Краткое наименование') &&
+        !result.name.includes('-ошибка') &&
+        !result.registrationDate?.includes('Исключен') &&
+        !result.status?.includes('Член СРО') &&
+        result.registrationDate !== result.status;
+
+      if (!isValidData) {
+        console.log('⚠️ Parser returned invalid data');
+        return {
+          success: false,
+          message: 'Получены некорректные данные. Обратитесь в поддержку.',
+        };
+      }
+
+      // STEP 2: Success - create user profile
+      console.log('Using mock authentication for parser-validated data');
       const mockUser: User = {
-        id: `guest-${Date.now()}`,
-        email: `${inn}@guest.sro`,
-        inn: innCheck.data.inn,
-        org_name: innCheck.data.org_name,
-        status: innCheck.data.status,
-        registration_date: innCheck.data.registration_date,
+        id: `parser-${Date.now()}`,
+        email: `${inn}@parser.sro`,
+        inn: result.inn,
+        org_name: result.name,
+        status: result.status,
+        registration_date: result.registrationDate,
         role: 'member',
-        dataSource: innCheck.dataSource
-      } as User;
+        dataSource: 'website' as const
+      };
 
       setUser(mockUser);
       localStorage.setItem('sro_guest_user', JSON.stringify(mockUser));
       setVerificationStatus({ isChecking: false, currentStep: '', dataSource: null });
 
-      showToast('success', 'Успешный вход', `Добро пожаловать, ${innCheck.data.org_name}`);
+      showToast('success', 'Успешный вход', `Добро пожаловать, ${result.name}`);
       return { success: true };
 
     } catch (error) {
       console.error('Sign in error:', error);
-      showToast('error', 'Ошибка', 'Произошла непредвиденная ошибка');
-      return { success: false, message: 'UNKNOWN_ERROR' };
+      const errorMessage = 'Не удалось получить ваши данные с сайта. Попробуйте ещё раз.';
+      setLoginError({
+        message: errorMessage,
+        showRetryButtons: true
+      });
+      return {
+        success: false,
+        message: errorMessage,
+        showRetryButtons: true
+      };
+    } finally {
+      setVerificationStatus({ isChecking: false, currentStep: '', dataSource: null });
     }
   };
 
@@ -571,6 +685,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  // Clear login error
+  const clearLoginError = () => {
+    setLoginError(null);
+  };
+
   const value: AuthContextType = {
     user,
     loading,
@@ -581,7 +700,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     testParser,
     guestRequestsToday,
     checkGuestLimit,
-    verificationStatus
+    verificationStatus,
+    loginError,
+    clearLoginError,
+    setLoginError
   };
 
   return (

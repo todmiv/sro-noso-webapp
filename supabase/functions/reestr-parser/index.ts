@@ -1,11 +1,4 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
-// Setup type definitions for built-in Supabase Runtime APIs
-/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
-
-
+// Full reestr-parser implementation
 interface SROEntry {
   inn: string;
   name: string;
@@ -68,8 +61,6 @@ async function scrapeData(inn: string) {
   const data: any = {};
 
   console.log('🎯 Starting HTML parsing...');
-
-  // Parse HTML with DOMParser
   const parser = new DOMParser();
   console.log('📋 Creating DOM parser...');
   const doc = parser.parseFromString(html, 'text/html');
@@ -142,7 +133,7 @@ async function scrapeData(inn: string) {
 Deno.serve(async (req: Request): Promise<Response> => {
   try {
     console.log('Auth header:', req.headers.get('Authorization'));
-    const { inn } = await req.json()
+    const { inn } = await req.json();
 
     // Local testing mode bypass (return mock data for development)
     if (!req.headers.get('Authorization')) {
@@ -171,7 +162,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 400,
           headers: { "Content-Type": "application/json" }
         }
-      )
+      );
     }
 
     console.log('🔍 === STARTING PARSER FOR INN:', inn);
@@ -198,15 +189,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return new Response(
         JSON.stringify({
           error: 'No data found',
-          debug: { 
+          debug: {
             rows_found: Object.keys(data).length,
-            html_length: html.length, 
+            html_length: html.length,
             snippet: html.substring(0, 1000),
             url: html.match(/<title[^>]*>([^<]*)/i)?.[1] || 'no title'
           },
           timestamp: new Date().toISOString()
         }),
-        { 
+        {
           status: 404,
           headers: { "Content-Type": "application/json" }
         }
@@ -218,17 +209,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
       success: true,
       result: result,
       timestamp: new Date().toISOString()
-    }
+    };
 
     return new Response(
       JSON.stringify(responseData),
       { headers: { "Content-Type": "application/json" } },
-    )
+    );
 
   } catch (error) {
-    console.error('Error in reestr-parser:', error)
+    console.error('Error in reestr-parser:', error);
 
-    const err = error as any
+    const err = error as any;
     if (err.name === 'AbortError') {
       return new Response(
         JSON.stringify({
@@ -239,7 +230,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 408,
           headers: { "Content-Type": "application/json" }
         }
-      )
+      );
     }
 
     return new Response(
@@ -251,9 +242,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
         status: 500,
         headers: { "Content-Type": "application/json" }
       }
-    )
+    );
   }
-})
+});
 
 /* To invoke locally:
 

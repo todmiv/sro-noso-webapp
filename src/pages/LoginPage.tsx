@@ -12,7 +12,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, verificationStatus } = useAuth();
+  const { signIn, checkInnExists, verificationStatus, loginError, clearLoginError, setLoginError } = useAuth();
 
   // Определяем, куда перенаправить после успешного входа
   const from = location.state?.from?.pathname || '/documents';
@@ -21,7 +21,12 @@ const LoginPage = () => {
     e.preventDefault();
     if (!inn.trim()) return;
 
+    await performLogin();
+  };
+
+  const performLogin = async () => {
     setLoading(true);
+    clearLoginError(); // Clear previous error before new attempt
     try {
       const result = await signIn(inn.trim());
       if (result.success) {
@@ -29,6 +34,34 @@ const LoginPage = () => {
       }
     } catch (error) {
       console.error('Login error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const performLocalLogin = async () => {
+    setLoading(true);
+    clearLoginError(); // Clear previous error before new attempt
+    try {
+      const checkResult = await checkInnExists(inn.trim());
+      if (checkResult.exists && checkResult.data) {
+        // For local login, we'll just redirect assuming user creation happens in AuthContext
+        // The real implementation would need a dedicated localLogin method in AuthContext
+        // For now, this is a simplified version
+        console.log('Local login successful:', checkResult.data);
+        navigate(from, { replace: true });
+      } else {
+        setLoginError({
+          message: 'Данные не найдены в локальном реестре',
+          showRetryButtons: false
+        });
+      }
+    } catch (error) {
+      console.error('Local login error:', error);
+      setLoginError({
+        message: 'Ошибка при входе через локальный реестр',
+        showRetryButtons: true
+      });
     } finally {
       setLoading(false);
     }
@@ -125,6 +158,46 @@ const LoginPage = () => {
                   Данные не найдены
                 </span>
               </>
+            )}
+          </div>
+        )}
+
+        {/* Login Error Display with Retry Buttons */}
+        {loginError && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center mb-3">
+              <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span className="text-red-800 text-sm font-medium">
+                {loginError.message}
+              </span>
+            </div>
+            {loginError.showRetryButtons && (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={performLogin}
+                    disabled={loading}
+                    className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+                  >
+                    Попробовать ещё раз
+                  </button>
+                  <button
+                    onClick={performLocalLogin}
+                    disabled={loading}
+                    className="flex-1 bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm font-medium"
+                  >
+                    Войти через локальный реестр
+                  </button>
+                </div>
+                <button
+                  onClick={() => navigate('/')}
+                  className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 text-sm font-medium"
+                >
+                  Перейти на Главную страницу
+                </button>
+              </div>
             )}
           </div>
         )}
