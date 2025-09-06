@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Static reestr data for TESTING (embedded directly for reliability)
+  // Static reestr data for TESTING (only real INNs from site)
   const TESTING_REESTR: Record<string, any> = {
     '5258098350': {
       status: 'Член СРО',
@@ -117,22 +117,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       status: 'Член СРО',
       org_name: 'ООО СК «СтройМакс»',
       registration_date: '22.12.2016'
-    },
-    '5249004549': {
-      status: 'Член СРО',
-      org_name: 'ПК «Ремстроймонтаж»',
-      registration_date: '30.03.2017'
-    },
-    '5260344281': {
-      status: 'Член СРО',
-      org_name: 'ООО СМП «СтальМонтаж»',
-      registration_date: '09.11.2016'
-    },
-    '524501693705': {
-      status: 'Член СРО',
-      org_name: 'Полетаев А.В.',
-      registration_date: '02.12.2021'
     }
+    // Убраны ИНН которых нет на реальном сайте!
   };
 
   // State for local registry
