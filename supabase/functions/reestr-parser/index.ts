@@ -147,7 +147,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    if (!req.headers.get('Authorization')) {
+    // Allow localhost/development without auth, require auth only for production
+    const isDevelopment = req.headers.get('Referer')?.includes('localhost') ||
+                          req.headers.get('Origin')?.includes('localhost') ||
+                          req.headers.get('Host')?.includes('localhost');
+
+    if (!req.headers.get('Authorization') && !isDevelopment) {
       return new Response(
         JSON.stringify({
           error: "Authorization header is required for production use"
