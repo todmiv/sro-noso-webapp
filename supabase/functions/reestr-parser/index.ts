@@ -1,249 +1,62 @@
-// Full reestr-parser implementation
-interface SROEntry {
-  inn: string;
-  name: string;
-  status: string;
-  registrationDate: string;
-  found: boolean;
-}
+// Simple test function as suggested by the user
+// Deno.serve(async (req) => {
+//   if (req.method !== "POST") return new Response("Only POST", { status: 405 });
 
-interface RequestData {
-  inn: string;
-}
+//   const { inn } = await req.json().catch(() => ({ inn: null }));
+//   if (!inn) return new Response("inn required", { status: 400 });
 
-async function scrapeData(inn: string) {
-  console.log('📡 Starting scrapeData for INN:', inn);
-  console.log('🔗 Building search URL...');
+//   // TODO: здесь будет парсинг
+//   return new Response(JSON.stringify({ inn, status: "ok" }), {
+//     headers: { "Content-Type": "application/json" },
+//   });
+// });
 
-  const searchParams = new URLSearchParams({
-    'arrFilter_ff[NAME]': '',
-    'arrFilter_pf[INNNumber]': inn,
-    'set_filter': 'Показать'
-  });
+// Global function that doesn't require Deno global
+function handler(req: Request): Promise<Response> {
+  return handlerLogic();
 
-  const searchUrl = `https://www.sronoso.ru/reestr/?${searchParams.toString()}`;
-
-  console.log(`✅ Search URL ready: ${searchUrl}`);
-
-  console.log('🌐 Sending HTTP request to sronoso.ru...');
-  const startTime = Date.now();
-
-  const response = await fetch(searchUrl, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-      'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'DNT': '1',
-      'Connection': 'keep-alive',
-      'Upgrade-Insecure-Requests': '1'
+  async function handlerLogic(): Promise<Response> {
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      } });
     }
-  });
 
-  const endTime = Date.now();
-  console.log(`⏱️ Request completed in ${endTime - startTime}ms, status: ${response.status}`);
-
-  if (!response.ok) {
-    console.log(`❌ HTTP error: ${response.status} ${response.statusText}`);
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-  }
-
-  console.log('📄 Receiving HTML response...');
-  const html = await response.text();
-  console.log(`📊 HTML received, length: ${html.length} characters`);
-
-  if (html.length === 0) {
-    throw new Error('Empty HTML response from server');
-  }
-
-  console.log('🔎 Preview of HTML (first 500 chars):', html.substring(0, 500));
-
-  const data: any = {};
-
-  console.log('🎯 Starting HTML parsing...');
-  const parser = new DOMParser();
-  console.log('📋 Creating DOM parser...');
-  const doc = parser.parseFromString(html, 'text/html');
-
-  console.log('🎯 Searching for table elements...');
-  const rows = Array.from(doc.querySelectorAll('table tbody tr'));
-  console.log(`📋 Found ${rows.length} table rows`);
-
-  if (rows.length === 0) {
-    console.log('⚠️ Warning: No table rows found. Possible issues:');
-    console.log('  - Site structure changed');
-    console.log('  - No results for INN');
-    console.log('  - Anti-bot protection');
-  }
-
-  console.log('🔄 Processing table rows...');
-  const processedRows = rows.map((tr, index) => {
-    console.log(`🔍 Processing row ${index + 1}...`);
-    const tds = tr.querySelectorAll('td');
-    console.log(`🎯 Row has ${tds.length} cells`);
-
-    if (tds.length >= 4) {
-      const rowData = {
-        status: tds[0].textContent?.trim() || '',
-        org_name: tds[1].textContent?.trim() || '',
-        inn: tds[2].textContent?.trim() || '',
-        registration_date: tds[3].textContent?.trim() || ''
-      };
-
-      console.log(`📝 Extracted row data:`, rowData);
-      return rowData;
-    } else {
-      console.log(`⚠️ Insufficient cells in row ${index + 1}, skipping`);
-      return null;
+    if (req.method !== "POST") {
+      return new Response("Only POST", {
+        status: 405,
+        headers: { "Content-Type": "application/json" }
+      });
     }
-  }).filter(row => {
-    const isValid = row && row.inn;
-    if (isValid) {
-      console.log(`✅ Row with INN ${row!.inn} is valid`);
-    } else {
-      console.log(`❌ Row filtered out (no INN or invalid data)`);
-    }
-    return isValid;
-  });
 
-  console.log(`🎉 Processed ${processedRows.length} valid rows`);
-
-  processedRows.forEach((row, index) => {
-    if (row && row.inn) {
-      data[row.inn] = {
-        status: row.status,
-        org_name: row.org_name,
-        registration_date: row.registration_date
-      };
-      console.log(`💾 Stored data for INN ${row.inn}:`, data[row.inn]);
-    }
-  });
-
-  console.log(`📊 Final data summary:`);
-  console.log(`  - Total valid rows processed: ${processedRows.length}`);
-  console.log(`  - Unique INNs found: ${Object.keys(data).length}`);
-  if (processedRows.length > 0) {
-    console.log(`  - Sample data:`, JSON.stringify(processedRows[0]));
-  }
-
-  console.log('✅ scrapeData completed successfully');
-  return { data, html };
-}
-
-Deno.serve(async (req: Request): Promise<Response> => {
-  try {
-    console.log('Auth header:', req.headers.get('Authorization'));
-    const { inn } = await req.json();
-
-    if (!inn || typeof inn !== 'string') {
-      return new Response(
-        JSON.stringify({
-          error: "INN parameter is required and must be a string"
-        }),
-        {
+    try {
+      const { inn } = await req.json().catch(() => ({ inn: null }));
+      if (!inn) {
+        return new Response("inn required", {
           status: 400,
           headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      return new Response(JSON.stringify({ inn, status: "ok" }), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "Content-Type"
         }
-      );
-    }
-
-    // Allow localhost/development without auth, require auth only for production
-    const isDevelopment = req.headers.get('Referer')?.includes('localhost') ||
-                          req.headers.get('Origin')?.includes('localhost') ||
-                          req.headers.get('Host')?.includes('localhost');
-
-    if (!req.headers.get('Authorization') && !isDevelopment) {
-      return new Response(
-        JSON.stringify({
-          error: "Authorization header is required for production use"
-        }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json" }
-        }
-      );
-    }
-
-    console.log('🔍 === STARTING PARSER FOR INN:', inn);
-    console.log('📅 Timestamp:', new Date().toISOString());
-
-    const { data, html } = await scrapeData(inn);
-
-    console.log(`Найдено строк: ${Object.keys(data).length}`);
-    if (Object.keys(data).length > 0) {
-      console.log(`Пример строки: ${JSON.stringify(Object.values(data)[0])}`);
-    }
-
-    let result: SROEntry;
-    if (data[inn]) {
-      result = {
-        inn: inn,
-        name: data[inn].org_name,
-        status: data[inn].status,
-        registrationDate: data[inn].registration_date,
-        found: true
-      };
-    } else {
-      // Debug: return HTML snippet if no data found
-      return new Response(
-        JSON.stringify({
-          error: 'No data found',
-          debug: {
-            rows_found: Object.keys(data).length,
-            html_length: html.length,
-            snippet: html.substring(0, 1000),
-            url: html.match(/<title[^>]*>([^<]*)/i)?.[1] || 'no title'
-          },
-          timestamp: new Date().toISOString()
-        }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" }
-        }
-      );
-    }
-
-    // Возвращаем результат
-    const responseData = {
-      success: true,
-      result: result,
-      timestamp: new Date().toISOString()
-    };
-
-    return new Response(
-      JSON.stringify(responseData),
-      { headers: { "Content-Type": "application/json" } },
-    );
-
-  } catch (error) {
-    console.error('Error in reestr-parser:', error);
-
-    const err = error as any;
-    if (err.name === 'AbortError') {
-      return new Response(
-        JSON.stringify({
-          error: "Timeout: request took too long (5 seconds)",
-          timestamp: new Date().toISOString()
-        }),
-        {
-          status: 408,
-          headers: { "Content-Type": "application/json" }
-        }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        error: `Internal error: ${err.message || 'Unknown error'}`,
-        timestamp: new Date().toISOString()
-      }),
-      {
+      });
+    } catch (error) {
+      return new Response(JSON.stringify({ error: (error as Error).message }), {
         status: 500,
         headers: { "Content-Type": "application/json" }
-      }
-    );
+      });
+    }
   }
-});
+}
+
+export default handler;
 
 /* To invoke locally:
 

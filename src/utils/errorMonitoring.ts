@@ -2,8 +2,9 @@ import * as Sentry from '@sentry/react';
 
 // Initialize Sentry
 export const initErrorMonitoring = (dsn?: string) => {
-  if (!dsn) {
-    console.warn('Sentry DSN not configured, error monitoring disabled');
+  if (!dsn || dsn.startsWith('your_') || dsn.includes('your-') || !dsn.includes('sentry.io')) {
+    console.log('Invalid Sentry DSN: ' + (dsn || 'not configured'));
+    console.warn('Sentry DSN not configured or invalid, error monitoring disabled');
     return;
   }
 

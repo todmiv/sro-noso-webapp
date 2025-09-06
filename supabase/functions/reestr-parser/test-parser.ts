@@ -180,11 +180,12 @@ class ParserTestSuite {
 
   private parseHtmlTable(html: string) {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    const doc = parser.parseFromString(html, 'text/html') as Document;
+    if (!doc) return [];
     const rows = Array.from(doc.querySelectorAll('table tbody tr'));
 
     return rows.map(tr => {
-      const tds = tr.querySelectorAll('td');
+      const tds = (tr as Element).querySelectorAll('td');
       if (tds.length >= 4) {
         return {
           status: tds[0].textContent?.trim() || '',
@@ -339,6 +340,13 @@ export { runAllTests, ParserTestSuite };
 
 if (import.meta.main) {
   await runAllTests();
+}
+
+// Deno test export for compatibility
+if (typeof Deno !== 'undefined' && Deno.test) {
+  Deno.test("All parser tests", async () => {
+    await runAllTests();
+  });
 }
 
 // Example manual test

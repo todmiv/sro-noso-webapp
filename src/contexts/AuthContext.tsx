@@ -120,7 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Load local registry from JSON file
   const loadLocalRegistry = async (): Promise<string> => {
     try {
-      const response = await fetch('/reestr.json');
+      const response = await fetch(`${window.location.origin}/reestr.json`);
       if (!response.ok) {
         throw new Error(`Failed to load registry: ${response.status}`);
       }
