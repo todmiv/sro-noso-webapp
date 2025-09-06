@@ -40,8 +40,17 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Auto-detect local vs production environment
+const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+const supabaseUrl = isLocalhost
+  ? import.meta.env.VITE_SUPABASE_URL_LOCAL || 'http://127.0.0.1:54321'
+  : import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseKey = isLocalhost
+  ? import.meta.env.VITE_SUPABASE_ANON_KEY_LOCAL || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+  : import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+console.log('🔧 Supabase environment:', isLocalhost ? 'LOCAL' : 'PROD');
+console.log('🔗 Supabase URL:', supabaseUrl);
 
 let supabase: SupabaseClient;
 try {
