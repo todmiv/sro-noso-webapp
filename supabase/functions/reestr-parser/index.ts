@@ -135,58 +135,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
     console.log('Auth header:', req.headers.get('Authorization'));
     const { inn } = await req.json();
 
-    // Local testing mode bypass (return mock data for development)
-    if (!req.headers.get('Authorization')) {
-      console.log('🧪 Local testing mode: checking mock data for INN:', inn);
-
-      // Only valid INN from the actual site (no fake data)
-      const mockDatabase: Record<string, any> = {
-        '5258098350': {
-          name: 'ООО СТК «Грейт»',
-          status: 'Член СРО',
-          registrationDate: '30.08.2022'
-        },
-        '5249116108': {
-          name: 'ООО СК «СтройМакс»',
-          status: 'Член СРО',
-          registrationDate: '22.12.2016'
-        }
-        // ИНН 1234567890 НЕ ДОБАВЛЯЕМ - его нет на сайте!
-      };
-
-      const orgData = mockDatabase[inn];
-      if (!orgData) {
-        console.log('❌ INN not found in mock database');
-        return new Response(JSON.stringify({
-          success: true,
-          result: {
-            inn: inn,
-            name: '',
-            status: '',
-            registrationDate: '',
-            found: false
-          },
-          timestamp: new Date().toISOString(),
-          debug: 'Local mock mode - INN not found'
-        }), { headers: { "Content-Type": "application/json" } });
-      }
-
-      console.log('✅ INN found in mock database:', orgData);
-      const mockResponse = {
-        success: true,
-        result: {
-          inn: inn,
-          name: orgData.name,
-          status: orgData.status,
-          registrationDate: orgData.registrationDate,
-          found: true
-        },
-        timestamp: new Date().toISOString(),
-        debug: 'Local mock mode - found in database'
-      };
-      return new Response(JSON.stringify(mockResponse), { headers: { "Content-Type": "application/json" } });
-    }
-
     if (!inn || typeof inn !== 'string') {
       return new Response(
         JSON.stringify({
@@ -194,6 +142,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }),
         {
           status: 400,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+    }
+
+    if (!req.headers.get('Authorization')) {
+      return new Response(
+        JSON.stringify({
+          error: "Authorization header is required for production use"
+        }),
+        {
+          status: 401,
           headers: { "Content-Type": "application/json" }
         }
       );

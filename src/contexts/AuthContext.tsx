@@ -106,20 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Static reestr data for TESTING (only real INNs from site)
-  const TESTING_REESTR: Record<string, any> = {
-    '5258098350': {
-      status: 'Член СРО',
-      org_name: 'ООО СТК «Грейт»',
-      registration_date: '30.08.2022'
-    },
-    '5249116108': {
-      status: 'Член СРО',
-      org_name: 'ООО СК «СтройМакс»',
-      registration_date: '22.12.2016'
-    }
-    // Убраны ИНН которых нет на реальном сайте!
-  };
+  // No static data - use live parsing only
 
   // State for local registry
   const [localRegistry, setLocalRegistry] = useState<LocalRegistry>({});
@@ -224,7 +211,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               !result.name.includes('Краткое наименование') &&
               !result.name.includes('-ошибка') &&
               !result.registrationDate?.includes('Исключен') &&
-              !result.status?.includes('Член СРО') &&
+              result.status && // Status must exist and can be any value
               result.registrationDate !== result.status;
 
             console.log('📋 Validation results:');
@@ -438,10 +425,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         'Content-Type': 'application/json',
       };
 
-      // For prod, use real keys; for local, no auth (mock mode)
+      // Always include Authorization header for production
       if (!window.location.hostname.includes('localhost')) {
         headers['Authorization'] = `Bearer ${supabaseKey}`;
       }
+      // Production mode: header required for Supabase function
 
       console.log('🌐 Calling parser function...');
       const response = await fetch(`/supabase/functions/v1/reestr-parser`, {
