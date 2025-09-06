@@ -185,7 +185,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // For local development, use direct Supabase URL
       const parserUrl = window.location.hostname.includes('localhost')
         ? 'http://127.0.0.1:54321/functions/v1/reestr-parser'
-        : '/supabase/functions/v1/reestr-parser';
+        : `${supabaseUrl}/functions/v1/reestr-parser`;
 
       const response = await fetch(parserUrl, {
         method: 'POST',
@@ -331,7 +331,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // For local development, use direct Supabase URL
       const parserUrl = window.location.hostname.includes('localhost')
         ? 'http://127.0.0.1:54321/functions/v1/reestr-parser'
-        : '/supabase/functions/v1/reestr-parser';
+        : `${supabaseUrl}/functions/v1/reestr-parser`;
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -451,7 +451,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // For local development, use direct Supabase URL
       const parserUrl = window.location.hostname.includes('localhost')
         ? 'http://127.0.0.1:54321/functions/v1/reestr-parser'
-        : '/supabase/functions/v1/reestr-parser';
+        : `${supabaseUrl}/functions/v1/reestr-parser`;
 
       const response = await fetch(parserUrl, {
         method: 'POST',

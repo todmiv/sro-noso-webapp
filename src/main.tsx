@@ -10,9 +10,13 @@ import { initErrorMonitoring } from './utils/errorMonitoring'
 import { initAnalytics } from './utils/analytics'
 import './index.css'
 
-// Initialize monitoring and analytics
-initErrorMonitoring(import.meta.env.VITE_SENTRY_DSN)
-initAnalytics(import.meta.env.VITE_PLAUSIBLE_DOMAIN)
+// Initialize monitoring and analytics (optional - disabled if no DSN/domain configured)
+if (import.meta.env.VITE_SENTRY_DSN && !import.meta.env.VITE_SENTRY_DSN.includes('your_')) {
+  initErrorMonitoring(import.meta.env.VITE_SENTRY_DSN)
+}
+if (import.meta.env.VITE_PLAUSIBLE_DOMAIN && !import.meta.env.VITE_PLAUSIBLE_DOMAIN.includes('your_')) {
+  initAnalytics(import.meta.env.VITE_PLAUSIBLE_DOMAIN)
+}
 
 // Configure basename based on environment
 // For GitHub Pages deployment: '/sro-noso-webapp/'
