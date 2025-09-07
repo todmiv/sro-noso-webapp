@@ -81,21 +81,39 @@ export const useStatusIndicators = () => {
   const checkBackendStatus = async (): Promise<void> => {
     setBackendStatus('checking');
     try {
-      // Use different URLs for local vs prod
+      // Use Supabase function URLs for proper status checking
       const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
-      const backendUrl = isLocalhost
-        ? 'http://127.0.0.1:54321/rest/v1/'
-        : 'https://your-prod-supabase-url.supabase.co/rest/v1/'; // Replace with your actual prod URL
 
-      const response = await fetch(backendUrl, {
-        method: 'HEAD',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: AbortSignal.timeout(5000) // 5 second timeout
-      });
+      if (isLocalhost) {
+        // Local Supabase check
+        const backendUrl = 'http://127.0.0.1:54321/functions/v1/reestr-parser';
 
-      setBackendStatus(response.ok ? 'online' : 'offline');
+        const response = await fetch(backendUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ inn: 'test123' }), // Test request
+          signal: AbortSignal.timeout(5000) // 5 second timeout
+        });
+
+        setBackendStatus(response.status >= 400 ? 'offline' : 'online');
+      } else {
+        // Production Supabase check - use actual project URL
+        const backendUrl = 'https://xibewgvrooyvbragtwxm.supabase.co/functions/v1/reestr-parser';
+
+        const response = await fetch(backendUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
+          },
+          body: JSON.stringify({ inn: 'test123' }), // Test request
+          signal: AbortSignal.timeout(5000) // 5 second timeout
+        });
+
+        setBackendStatus(response.status >= 400 ? 'offline' : 'online');
+      }
     } catch (error) {
       console.error('Backend status check failed:', error);
       setBackendStatus('offline');
