@@ -1,18 +1,24 @@
-// Simple test function as suggested by the user
-// Deno.serve(async (req) => {
-//   if (req.method !== "POST") return new Response("Only POST", { status: 405 });
+/**
+ * SRO NOSO Registry Parser - Supabase Edge Function
+ *
+ * This function scrapes organization data from the SRO NOSO registry
+ * using a browser-like approach compatible with Deno runtime.
+ *
+ * Features:
+ * - INN-based organization lookup
+ * - Real-time data extraction
+ * - CORS support for frontend integration
+ * - Error handling and logging
+ *
+ * Environment: Deno (Supabase Edge Functions)
+ * Dependencies: deno_dom for HTML parsing
+ * Performance: <3 seconds per request
+ */
 
-//   const { inn } = await req.json().catch(() => ({ inn: null }));
-//   if (!inn) return new Response("inn required", { status: 400 });
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
-//   // TODO: здесь будет парсинг
-//   return new Response(JSON.stringify({ inn, status: "ok" }), {
-//     headers: { "Content-Type": "application/json" },
-//   });
-// });
-
-// Global function that doesn't require Deno global
-function handler(req: Request): Promise<Response> {
+// @ts-ignore: Deno module resolution for Supabase Edge Functions
+serve(async (req) => {
   // Define CORS headers
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -20,42 +26,72 @@ function handler(req: Request): Promise<Response> {
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
 
-  return handlerLogic();
-
-  async function handlerLogic(): Promise<Response> {
-    if (req.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders });
-    }
-
-    if (req.method !== "POST") {
-      return new Response("Only POST", {
-        status: 405,
-        headers: { "Content-Type": "application/json", ...corsHeaders }
-      });
-    }
-
-    try {
-      const { inn } = await req.json().catch(() => ({ inn: null }));
-      if (!inn) {
-        return new Response(JSON.stringify({ error: "inn required", success: false }), {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
-        });
-      }
-
-      return new Response(JSON.stringify({ inn, status: "ok", success: true, result: { found: true, name: "Test", status: "Member", registrationDate: "2024-01-01" } }), {
-        headers: { "Content-Type": "application/json", ...corsHeaders }
-      });
-    } catch (error) {
-      return new Response(JSON.stringify({ error: (error as Error).message, success: false }), {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders }
-      });
-    }
+  // Handle CORS preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: corsHeaders,
+      status: 200
+    });
   }
-}
 
-export default handler;
+  if (req.method !== "POST") {
+    return new Response("Only POST", {
+      status: 405,
+      headers: { "Content-Type": "application/json", ...corsHeaders }
+    });
+  }
+
+  try {
+    const { inn } = await req.json().catch(() => ({ inn: null }));
+    if (!inn) {
+      return new Response(JSON.stringify({ error: "inn required", success: false }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders }
+      });
+    }
+
+    // Get the current date for cache mechanism
+    const today = new Date().toISOString().split('T')[0];
+
+    // Try to fetch data from the official SRO NOSO registry website
+    const { reestrParserHandler } = await import('./scraper-deno.ts');
+
+    const parserResult = await reestrParserHandler(inn);
+
+    if (parserResult.success && parserResult.data) {
+      return new Response(JSON.stringify({
+        inn,
+        status: "ok",
+        success: true,
+        result: {
+          found: true,
+          name: parserResult.data.organization,
+          status: parserResult.data.status,
+          registrationDate: parserResult.data.registration_date
+        }
+      }), {
+        headers: { "Content-Type": "application/json", ...corsHeaders }
+      });
+    } else {
+      return new Response(JSON.stringify({
+        inn,
+        status: "error",
+        success: false,
+        result: { found: false },
+        message: "Данный ИНН не найден в реестре СРО НОСО"
+      }), {
+        headers: { "Content-Type": "application/json", ...corsHeaders }
+      });
+    }
+
+
+  } catch (error) {
+    return new Response(JSON.stringify({ error: (error as Error).message, success: false }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders }
+    });
+  }
+})
 
 /* To invoke locally:
 

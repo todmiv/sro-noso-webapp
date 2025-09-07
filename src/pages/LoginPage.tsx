@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import StatusIndicator, { useStatusIndicators } from '../components/StatusIndicators';
 
 const LoginPage = () => {
   // Добавляем эффект прокрутки к началу страницы при монтировании компонента
@@ -13,6 +14,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn, checkInnExists, verificationStatus, loginError, clearLoginError, setLoginError } = useAuth();
+  const { mode, backendStatus, websiteStatus } = useStatusIndicators();
 
   // Определяем, куда перенаправить после успешного входа
   const from = location.state?.from?.pathname || '/documents';
@@ -81,6 +83,9 @@ const LoginPage = () => {
           <h2 className="text-2xl font-bold text-gray-800">Вход для членов СРО</h2>
           <p className="text-gray-600 mt-2">Введите ваш ИНН для доступа к личному кабинету</p>
         </div>
+
+        <StatusIndicator mode={mode} backendStatus={backendStatus} websiteStatus={websiteStatus} />
+
         <form onSubmit={handleLogin}>
           <div className="mb-6">
             <label htmlFor="inn" className="flex items-center text-gray-700 text-sm font-bold mb-2">

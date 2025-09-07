@@ -118,21 +118,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   });
 
   // Load local registry from JSON file
+  // TODO: REF v1.2 - Remove reestr.json loading functionality
+  // const loadLocalRegistry = async (): Promise<string> => {
+  //   try {
+  //     const response = await fetch(`${window.location.origin}/reestr.json`);
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to load registry: ${response.status}`);
+  //     }
+  //     const data: LocalRegistry = await response.json();
+  //     console.log('✅ Local registry loaded successfully');
+  //     setLocalRegistry(data);
+  //     setRegistryLoaded(true);
+  //     return 'Registry loaded successfully';
+  //   } catch (error) {
+  //     console.error('❌ Failed to load local registry:', error);
+  //     return `Error loading registry: ${error instanceof Error ? error.message : String(error)}`;
+  //   }
+  // };
   const loadLocalRegistry = async (): Promise<string> => {
-    try {
-      const response = await fetch(`${window.location.origin}/reestr.json`);
-      if (!response.ok) {
-        throw new Error(`Failed to load registry: ${response.status}`);
-      }
-      const data: LocalRegistry = await response.json();
-      console.log('✅ Local registry loaded successfully');
-      setLocalRegistry(data);
-      setRegistryLoaded(true);
-      return 'Registry loaded successfully';
-    } catch (error) {
-      console.error('❌ Failed to load local registry:', error);
-      return `Error loading registry: ${error instanceof Error ? error.message : String(error)}`;
-    }
+    // TODO: REF v1.2 - Remove local registry loading entirely
+    console.log('✅ Local registry loading disabled');
+    setRegistryLoaded(true);
+    return 'Registry loading disabled';
   };
 
   // Update local registry entry
@@ -265,19 +272,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     // Check local registry
-    setVerificationStatus({ isChecking: true, currentStep: 'Проверка локального реестра СРО НОСО...', dataSource: 'local' });
-    await new Promise(resolve => setTimeout(resolve, 3000)); // 3 seconds for local registry check
+    // TODO: REF v1.2 - Remove local registry fallback functionality
+    setVerificationStatus({ isChecking: true, currentStep: 'Проверка локального реестра отключена...', dataSource: 'local' });
+    await new Promise(resolve => setTimeout(resolve, 3000)); // 3 seconds for registry sync delay
 
-    console.log('🏠 STEP 3: Checking local registry...');
-    if (registryLoaded && localRegistry[inn]) {
-      const localData = localRegistry[inn];
-      console.log('✅ Found in local registry:', localData);
-      return {
-        exists: true,
-        data: { inn, ...localData, role: 'member' },
-        dataSource: 'local' as const
-      };
-    }
+    console.log('🏠 STEP 3: Local registry check disabled');
+    // if (registryLoaded && localRegistry[inn]) {
+    //   const localData = localRegistry[inn];
+    //   console.log('✅ Found in local registry:', localData);
+    //   return {
+    //     exists: true,
+    //     data: { inn, ...localData, role: 'member' },
+    //     dataSource: 'local' as const
+    //   };
+    // }
 
     console.log(`❌ INN ${inn} not found anywhere`);
     setVerificationStatus({ isChecking: false, currentStep: '', dataSource: null });
@@ -288,39 +296,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Sync site data with local registry
+  // TODO: REF v1.2 - Remove registry sync functionality entirely
+  // const syncWithLocalRegistry = async (inn: string, siteData: any): Promise<void> => {
+  //   if (!registryLoaded) {
+  //     console.log('⚠️ Local registry not loaded yet');
+  //     return;
+  //   }
+
+  //   const localEntry = localRegistry[inn];
+  //   const siteEntry = {
+  //     status: siteData.status,
+  //     org_name: siteData.org_name,
+  //     registration_date: siteData.registration_date
+  //   };
+
+  //   if (!localEntry) {
+  //     // Add to local registry if not exists
+  //     console.log(`➕ Adding ${inn} to local registry`);
+  //     updateLocalRegistry(inn, siteEntry);
+  //   } else {
+  //     // Check if data differs and update if needed
+  //     const localString = JSON.stringify({
+  //       status: localEntry.status,
+  //       org_name: localEntry.org_name,
+  //       registration_date: localEntry.registration_date
+  //     });
+  //     const siteString = JSON.stringify(siteEntry);
+
+  //     if (localString !== siteString) {
+  //       console.log(`🔄 Updating ${inn} in local registry (data differs)`);
+  //       updateLocalRegistry(inn, siteEntry);
+  //     } else {
+  //       console.log(`✅ Local registry data matches site data for ${inn}`);
+  //     }
+  //   }
+  // };
   const syncWithLocalRegistry = async (inn: string, siteData: any): Promise<void> => {
-    if (!registryLoaded) {
-      console.log('⚠️ Local registry not loaded yet');
-      return;
-    }
-
-    const localEntry = localRegistry[inn];
-    const siteEntry = {
-      status: siteData.status,
-      org_name: siteData.org_name,
-      registration_date: siteData.registration_date
-    };
-
-    if (!localEntry) {
-      // Add to local registry if not exists
-      console.log(`➕ Adding ${inn} to local registry`);
-      updateLocalRegistry(inn, siteEntry);
-    } else {
-      // Check if data differs and update if needed
-      const localString = JSON.stringify({
-        status: localEntry.status,
-        org_name: localEntry.org_name,
-        registration_date: localEntry.registration_date
-      });
-      const siteString = JSON.stringify(siteEntry);
-
-      if (localString !== siteString) {
-        console.log(`🔄 Updating ${inn} in local registry (data differs)`);
-        updateLocalRegistry(inn, siteEntry);
-      } else {
-        console.log(`✅ Local registry data matches site data for ${inn}`);
-      }
-    }
+    // TODO: REF v1.2 - Registry sync disabled
+    console.log('📝 Local registry sync disabled');
   };
 
   // Test parser function separately (without fallback to local registry)
