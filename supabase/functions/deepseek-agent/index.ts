@@ -25,58 +25,257 @@ interface DeepSeekRequest {
   question: string;
 }
 
-// Полный список документов с их метаданными для RAG
+// ПОЛНЫЙ СПИСОК ДОКУМЕНТОВ СРО НОСО ДЛЯ RAG АНАЛИЗА
 const DOCUMENTS_DATA: DocumentChunk[] = [
+  // ОСНОВНЫЕ УЧРЕДИТЕЛЬНЫЕ ДОКУМЕНТЫ
   {
     id: "ustav-sro-noso",
     title: "Устав Ассоциации «Нижегородское объединение строительных организаций»",
-    content: "Основной устав организации. Регулирует деятельность, права и обязанности членов, внутреннюю структуру управления.",
+    content: "Основной устав организации. Регулирует деятельность, права и обязанности членов, внутреннюю структуру управления, цели и задачи СРО.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/ustav_sro_noso.pdf",
     relevanceScore: 0
   },
   {
+    id: "svidetelstvo-gos-registratsiya",
+    title: "Свидетельство о государственной регистрации",
+    content: "Подтверждение государственной регистрации СРО как юридического лица. Регистрационные данные, ОГРН, ИНН СРО.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/svidetelstvo_gos_registratsiya.pdf",
+    relevanceScore: 0
+  },
+
+  // СТАНДАРТЫ И ТРЕБОВАНИЯ
+  {
     id: "standart-assotsiatsii",
     title: "Стандарт Ассоциации «Нижегородское объединение строительных организаций»",
-    content: "Основные стандарты и требования саморегулируемой организации. Определяет минимальные требования к членам СРО, критерии допуска к работам.",
+    content: "Основные стандарты и требования саморегулируемой организации. Минимальные требования к членам СРО, критерии допуска к работам, общие правила деятельности.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/standart_assotsiatsii.pdf",
     relevanceScore: 0
   },
   {
+    id: "pravila-provedenia-samo-regulirovaniya",
+    title: "Правила осуществления саморегулирования",
+    content: "Правила контролирования деятельности членов СРО. Процедуры проверки соблюдения стандартов, ведения реестров, отчетности.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_provedenia_samo_regulirovaniya.pdf",
+    relevanceScore: 0
+  },
+
+  // ЧЛЕНСТВО И ВСТУПЛЕНИЕ
+  {
     id: "polozhenie-o-chlenstve-v-sro",
     title: "Положение о членстве в СРО",
-    content: "Условия членства и порядок вступления в саморегулируемую организацию. Взносы, требования к кандидатам, процедура приема.",
+    content: "Условия членства и порядок вступления в саморегулируемую организацию. Взносы, требования к кандидатам, процедура приема, права и обязанности членов.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_chlenstve_v_sro.pdf",
     relevanceScore: 0
   },
   {
+    id: "procedura-vstupleniya-v-chleny",
+    title: "Процедура вступления в члены Ассоциации",
+    content: "Порядок подачи заявления на членство. Необходимые документы, сроки рассмотрения, комиссии по приему, критерии одобрения.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/procedura_vstupleniya_v_chleny.pdf",
+    relevanceScore: 0
+  },
+
+  // КВАЛИФИКАЦИЯ И ОБРАЗОВАНИЕ
+  {
     id: "kvalifikatsionnyy-standart-rukovoditel",
     title: "Квалификационный стандарт Руководитель строительной организации",
-    content: "Квалификационные требования к руководителям строительства. Опыт работы, образование, профессиональные навыки.",
+    content: "Квалификационные требования к руководителям строительства. Опыт работы, образование, профессиональные навыки, повышение квалификации.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/kvalifikatsionnyy_standart_rukovoditel_stroitelnoy_organizatsii.pdf",
     relevanceScore: 0
   },
   {
+    id: "kvalifikatsionnyy-standart-ispolnitel",
+    title: "Квалификационный стандарт Исполнитель работ",
+    content: "Требования к исполнительным работникам строительства. Специальности, опыт, образование, сертификация квалификации.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/kvalifikatsionnyy_standart_ispolnitel_rabot.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "kvalifikatsionnyy-standart-proektirovshchik",
+    title: "Квалификационный стандарт Проектировщик",
+    content: "Требования к проектировщикам и архитекторам. Образование, опыт проектирования, специальности и сертификаты.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/kvalifikatsionnyy_standart_proektirovshchik.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "kvalifikatsionnyy-standart-inzhener",
+    title: "Квалификационный стандарт Инженер строительного надзора",
+    content: "Квалификация инженеров строительного контроля. Опыт работы, образование, отраслевые сертификаты.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/kvalifikatsionnyy_standart_inzhener.pdf",
+    relevanceScore: 0
+  },
+
+  // СТРАХОВАНИЕ И ОТВЕТСТВЕННОСТЬ
+  {
     id: "strahovanie-grazhdanskaya-otvetstvennost",
     title: "Положение о страховании гражданской ответственности",
-    content: "Страхование ответственности за качество строительных работ. Требования к страхованию, суммы покрытия, случаи выплат.",
+    content: "Страхование ответственности за качество строительных работ. Требования к страхованию, суммы покрытия, случаи выплат, договоры страхования.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_strakhovanii_grazhdanskoy_otvetstvennosti.pdf",
     relevanceScore: 0
   },
   {
     id: "kompens-fond-vred",
     title: "Положение о компенсационном фонде возмещения вреда",
-    content: "Фонд возмещения вреда от недостатков работ членов СРО. Финансовая ответственность, условия выплат.",
+    content: "Фонд возмещения вреда от недостатков работ членов СРО. Финансовая ответственность, условия выплат, размер взносов в фонд.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_kompensatsionnom_fonde_vozmescheniya_vreda.pdf",
     relevanceScore: 0
   },
   {
+    id: "kompens-fond-odobrenie",
+    title: "Положение о компенсационном фонде обеспечения договорных обязательств",
+    content: "Фонд обеспечения договорных обязательств. Гарантии выполнения договоров, условия выплат из фонда.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_kompensatsionnom_fonde_odobrenie.pdf",
+    relevanceScore: 0
+  },
+
+  // ДИСЦИПЛИНА И КОНТРОЛЬ
+  {
     id: "polozhenie-o-distsiplinarnykh-vzyskaniyakh",
     title: "Положение о дисциплинарном воздействии",
-    content: "Система дисциплинарной ответственности членов СРО. Нарушение стандартов, меры воздействия, процедуры рассмотрения.",
+    content: "Система дисциплинарной ответственности членов СРО. Нарушение стандартов, меры воздействия, процедуры рассмотрения жалоб.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_distsiplinarnykh_vzyskaniyakh_za_narusheniya_stroitelnykh_norm.pdf",
     relevanceScore: 0
   },
-  // Добавить остальные документы аналогично...
+  {
+    id: "postanovlenie-ob-isklyuchenii",
+    title: "Положение об исключении из членов Ассоциации",
+    content: "Основания и процедура исключения из членов СРО. Критерии недостойного поведения, порядок рассмотрения дел.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/postanovlenie_ob_isklyuchenii.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "komissiya-po-etike",
+    title: "Положение о комиссии по этике и профессиональной деятельности",
+    content: "Комиссия по соблюдению профессиональной этики. Рассмотрение жалоб, этические нормы, процедуры осуждения.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/komissiya_po_etike.pdf",
+    relevanceScore: 0
+  },
+
+  // ФИНАНСОВЫЕ ДОКУМЕНТЫ
+  {
+    id: "polozhenie-o-vznosakh",
+    title: "Положение о взносах в компенсационные фонды",
+    content: "Размеры и порядок уплаты взносов. Обязательные и добровольные платежи, сроки уплаты, льготы и скидки.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_vznosakh.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "polozhenie-o-godovyh-chlennykh-vznosakh",
+    title: "Положение о годовых членских взносах",
+    content: "Ежегодные членские взносы на деятельность СРО. Размер взносов, сроки оплаты, использование средств.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_godovyh_chlennykh_vznosakh.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "bukhgalterskaya-otchetnost",
+    title: "Бухгалтерская отчетность Ассоциации",
+    content: "Финансовая отчетность СРО. Баланс, отчет о прибылях и убытках, использование средств компенсационных фондов.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/bukhgalterskaya_otchetnost.pdf",
+    relevanceScore: 0
+  },
+
+  // РЕГУЛИРОВАНИЕ И НАДЗОР
+  {
+    id: "vnutrennie-dokumenty",
+    title: "Внутренние документы по контролю качества",
+    content: "Документальные процедуры контроля качества. Стандарты контроля, аудит, инспекции, отчетность о качестве.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/vnutrennie_dokumenty.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "reglament-atestatsii",
+    title: "Регламент проведения аттестации специалистов",
+    content: "Процедура аттестации квалификации. Воцедуры оценки, комиссии, сертификаты соответствия.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/reglament_atestatsii.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "reglament-obucheniya",
+    title: "Регламент проведения обучения и повышения квалификации",
+    content: "Программы повышения квалификации. Курсы, семинары, сертификация профессиональной подготовки.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/reglament_obucheniya.pdf",
+    relevanceScore: 0
+  },
+
+  // РЕЕСТРЫ И СПРАВОЧНЫЕ ДОКУМЕНТЫ
+  {
+    id: "reestr-chlenov",
+    title: "Реестр членов Ассоциации СРО НОСО",
+    content: "Список организаций-членов СРО. Данные компаний, статус членства, контактная информация, виды допусков.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/reestr_chlenov.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "reestr-dopuskoy",
+    title: "Реестр выданных свидетельств о допуске",
+    content: "Регламент выдачи свидетельств. Критерии допуска, виды работ, контроль за соответствием требованиям.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/reestr_dopuskoy.pdf",
+    relevanceScore: 0
+  },
+
+  // ОГРАНИЧИТЕЛЬНЫЕ И ПОЯСНИТЕЛЬНЫЕ ДОКУМЕНТЫ
+  {
+    id: "ogr-nichtozhnost-sdelki",
+    title: "Ограничение ничтожности сделки",
+    content: "Правовые аспекты заключения договоров. Условия действительности контрактов, ответственность за недействительные сделки.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/ogr_nichtozhnost_sdelki.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "perechen-rabot",
+    title: "Перечень видов работ по инженерным изысканиям",
+    content: "Классификация работ требующих членства в СРО. Виды инженерных изысканий, геолого-разведочные работы.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/perechen_rabot.pdf",
+    relevanceScore: 0
+  },
+
+  // ДОКУМЕНТЫ ОБЩЕГО ПОЛОЖЕНИЯ
+  {
+    id: "bylleten-assotsiyatsii",
+    title: "Бюллетень Ассоциации",
+    content: "Информационный бюллетень СРО. Новости, изменения законодательства, информационные материалы для членов.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/bylleten_assotsiyatsii.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "otchet-predsedatelya",
+    title: "Отчет Председателя Правления за период",
+    content: "Информавательные материалы о деятельности СРО. Достижения, планы, текущие проекты организации.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/otchet_predsedatelya.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "kontaktnaya-informatsiya",
+    title: "Контактная информация Ассоциации СРО НОСО",
+    content: "Адреса, телефоны, email СРО и руководства. Расписание работы, юридический адрес.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/kontaktnaya_informatsiya.pdf",
+    relevanceScore: 0
+  },
+
+  // ДОСТУП К ЭЛЕКТРОННЫМ ПРОГРАММАМ
+  {
+    id: "elektronnaya-sistema-atestatsii",
+    title: "Электронная система аттестации специалистов",
+    content: "Информационная система для аттестации. Онлайн-тестирование, сертификация, мониторинг квалификации.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/elektronnaya_sistema_atestatsii.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "programmnoe-obespechenie-sro",
+    title: "Программное обеспечение для членов СРО",
+    content: "Автоматизированные системы учета. Программы для учета взносов, контроля членов, ведения документации.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/programmnoe_obespechenie_sro.pdf",
+    relevanceScore: 0
+  },
+
+  // ОБЩЕСТВЕННОЕ МНЕНИЕ И ОТЗЫВЫ
+  {
+    id: "anketa-udovletvorennosti",
+    title: "Анкета удовлетворенности членов СРО",
+    content: "Оценка качества услуг СРО. Опросы членов, качество обслуживания, предложения по улучшению.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/anketa_udovletvorennosti.pdf",
+    relevanceScore: 0
+  }
 ];
 
 // Функция для поиска релевантных документов
