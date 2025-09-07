@@ -17,7 +17,7 @@ const LoginPage = () => {
   const { mode, backendStatus, websiteStatus } = useStatusIndicators();
 
   // Определяем, куда перенаправить после успешного входа
-  const from = location.state?.from?.pathname || '/documents';
+  const from = location.state?.from?.pathname || '/profile';
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
