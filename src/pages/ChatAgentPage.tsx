@@ -84,7 +84,10 @@ const ChatAgentPage = () => {
         console.warn('No Supabase session:', error);
       }
 
-      const response = await fetch('/api/functions/v1/deepseek-agent', {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xibewgvrooyvbragtwxm.supabase.co';
+      const apiUrl = `${supabaseUrl}/functions/v1/deepseek-agent`;
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
