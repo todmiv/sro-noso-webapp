@@ -57,60 +57,9 @@ export const documents: Document[] = [
   },
 
   // Certificates and Registrations (Свидетельства и регистрации) - UPDATED
-  {
-    id: "procedura-vstupleniya-v-chleny",
-    title: "Процедура вступления в члены Ассоциации",
-    description: "Порядок подачи заявления на членство. Необходимые документы, сроки рассмотрения, комиссии по приему.",
-    category: "Свидетельства и регистрации",
-    fileSize: "312 KB",
-    publishedDate: "1 hour ago",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/procedura_vstupleniya_v_chleny.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/procedura_vstupleniya_v_chleny.pdf",
-    available: true,
-    relevanceScore: 88,
-    tags: ["вступление в СРО", "членство", "процедура"]
-  },
-  {
-    id: "kvak",
-    title: "Правила саморегулирования",
-    description: "Правила контролирования деятельности членов СРО. Процедуры проверки соблюдения стандартов.",
-    category: "Свидетельства и регистрации",
-    fileSize: "278 KB",
-    publishedDate: "1 hour ago",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_provedenia_samo_regulirovaniya.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_provedenia_samo_regulirovaniya.pdf",
-    available: true,
-    relevanceScore: 89,
-    tags: ["саморегулирование", "правила", "контроль"]
-  },
 
-  // NEW ADDED DOCUMENTS - Заменяем старые регистрационные документы
-  {
-    id: "polozhenie-o-vznosakh",
-    title: "Положение о взносах в компенсационные фонды",
-    description: "Размеры и порядок уплаты взносов. Обязательные и добровольные платежи, сроки уплаты.",
-    category: "Нормативные документы",
-    fileSize: "1.2 MB",
-    publishedDate: "1 hour ago",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_vznosakh.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_vznosakh.pdf",
-    available: true,
-    relevanceScore: 90,
-    tags: ["взносы", "компенсационные фонды", "финансовая ответственность"]
-  },
-  {
-    id: "vnutrennie-dokumenty",
-    title: "Внутренние документы по контролю качества",
-    description: "Процедура контроля деятельности членов СРО и качества выполняемых работ.",
-    category: "Нормативные документы",
-    fileSize: "540 KB",
-    publishedDate: "1 hour ago",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/vnutrennie_dokumenty.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/vnutrennie_dokumenty.pdf",
-    available: true,
-    relevanceScore: 88,
-    tags: ["контроль качества", "внутренние документы", "процедуры контроля"]
-  },
+
+
 
   // Methodological Documents (Методические документы)
   {
@@ -151,19 +100,6 @@ export const documents: Document[] = [
     available: true,
     relevanceScore: 89,
     tags: ["жалобы", "процедура рассмотрения", "обращения"]
-  },
-  {
-    id: "otchety-analiz-polozhenie",
-    title: "Положение «О проведении саморегулируемой организацией Ассоциацией «Нижегородское объединение строительных организаций» анализа деятельности своих членов на основании информации, представляемой ими в форме отчётов»",
-    description: "Методика анализа деятельности членов СРО на основе отчетов",
-    category: "Методические документы",
-    fileSize: "1.3 MB",
-    publishedDate: "27.09.2023",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/otchety-analiz-polozhenie.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/otchety-analiz-polozhenie.pdf",
-    available: true,
-    relevanceScore: 87,
-    tags: ["анализ деятельности", "отчеты", "методика"]
   },
   {
     id: "polozhenie-o-distsiplinarnom-organe",
