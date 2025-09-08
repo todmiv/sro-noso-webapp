@@ -65,6 +65,7 @@ serve(async (req) => {
         success: true,
         result: {
           found: true,
+          inn: inn,
           name: parserResult.data.organization,
           status: parserResult.data.status,
           registrationDate: parserResult.data.registration_date
