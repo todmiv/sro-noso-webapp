@@ -56,112 +56,60 @@ export const documents: Document[] = [
     tags: ["членство", "взносы", "вступление"]
   },
 
-  // Certificates and Registrations (Свидетельства и регистрации)
+  // Certificates and Registrations (Свидетельства и регистрации) - UPDATED
   {
-    id: "svidetelstvo-gos-reg-2009",
-    title: "Свидетельство о государственной регистрации юридического лица от 29.04.2009 года",
-    description: "Основной документы о государственной регистрации организации",
+    id: "procedura-vstupleniya-v-chleny",
+    title: "Процедура вступления в члены Ассоциации",
+    description: "Порядок подачи заявления на членство. Необходимые документы, сроки рассмотрения, комиссии по приему.",
     category: "Свидетельства и регистрации",
-    fileSize: "0.8 MB",
-    publishedDate: "29.04.2009",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/svidetelstvo_o_gosudarstvennoy_registratsii.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/svidetelstvo_o_gosudarstvennoy_registratsii.pdf",
-    available: false,
-    relevanceScore: 95,
-    tags: ["государственная регистрация", "юридический статус"]
+    fileSize: "312 KB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/procedura_vstupleniya_v_chleny.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/procedura_vstupleniya_v_chleny.pdf",
+    available: true,
+    relevanceScore: 88,
+    tags: ["вступление в СРО", "членство", "процедура"]
   },
   {
-    id: "nalog-org-2009",
-    title: "Свидетельство о постановке организации на учет в налоговом органе от 29.04.2009 года",
-    description: "Налоговый учет организации",
+    id: "kvak",
+    title: "Правила саморегулирования",
+    description: "Правила контролирования деятельности членов СРО. Процедуры проверки соблюдения стандартов.",
     category: "Свидетельства и регистрации",
-    fileSize: "0.6 MB",
-    publishedDate: "29.04.2009",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/nalog-org-2009.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/nalog-org-2009.pdf",
-    available: false,
-    relevanceScore: 80,
-    tags: ["налоговый учет", "ИНН"]
+    fileSize: "278 KB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_provedenia_samo_regulirovaniya.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_provedenia_samo_regulirovaniya.pdf",
+    available: true,
+    relevanceScore: 89,
+    tags: ["саморегулирование", "правила", "контроль"]
   },
 
-  // SRO Registration Documents (Документы регистрации в СРО)
+  // NEW ADDED DOCUMENTS - Заменяем старые регистрационные документы
   {
-    id: "reshenie-vnesenie-sro",
-    title: "Решение о внесении сведений в государственный реестр саморегулируемых организаций",
-    description: "Подтверждение регистрации организации как СРО",
-    category: "СРО регистрация",
-    fileSize: "0.9 MB",
-    publishedDate: "10.11.2009",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/reshenie-vnesenie-sro.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/reshenie-vnesenie-sro.pdf",
-    available: false,
-    relevanceScore: 88,
-    tags: ["СРО", "реестр", "регистрация"]
-  },
-  {
-    id: "uvedomlenie-sro-reg",
-    title: "Уведомление о внесении сведений в государственный реестр саморегулируемых организаций",
-    description: "Подтверждение приема с уведомлением о регистрации",
-    category: "СРО регистрация",
-    fileSize: "0.7 MB",
-    publishedDate: "10.11.2009",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/uvedomlenie-sro-reg.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/uvedomlenie-sro-reg.pdf",
-    available: false,
-    relevanceScore: 85,
-    tags: ["усведомление", "СРО", "регистрация"]
-  },
-  {
-    id: "svidetelstvo-gos-reg-2017",
-    title: "Свидетельство о государственной регистрации некоммерческой организации от 02.03.2017",
-    description: "Регистрация некоммерческой организации Ассоциации НОСО",
-    category: "Свидетельства и регистрации",
-    fileSize: "0.8 MB",
-    publishedDate: "02.03.2017",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/svidetelstvo-gos-reg-2017.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/svidetelstvo-gos-reg-2017.pdf",
+    id: "polozhenie-o-vznosakh",
+    title: "Положение о взносах в компенсационные фонды",
+    description: "Размеры и порядок уплаты взносов. Обязательные и добровольные платежи, сроки уплаты.",
+    category: "Нормативные документы",
+    fileSize: "1.2 MB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_vznosakh.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/polozhenie_o_vznosakh.pdf",
     available: true,
-    relevanceScore: 87,
-    tags: ["государственная регистрация", "некоммерческая организация"]
+    relevanceScore: 90,
+    tags: ["взносы", "компенсационные фонды", "финансовая ответственность"]
   },
   {
-    id: "nalog-org-2017",
-    title: "Свидетельство о постановке организации на учет в налоговом органе от 05.12.2016 года",
-    description: "Налоговый учет организации по новому свидетельству",
-    category: "Свидетельства и регистрации",
-    fileSize: "0.6 MB",
-    publishedDate: "05.12.2016",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/nalog-org-2017.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/nalog-org-2017.pdf",
-    available: false,
-    relevanceScore: 78,
-    tags: ["налоговый учет", "повторное свидетельство"]
-  },
-  {
-    id: "list-zapisi-2016",
-    title: "Лист записи от 13.10.2016 года",
-    description: "Запись о внесенных изменениях в регистрационные документы",
-    category: "Юридические документы",
-    fileSize: "0.5 MB",
-    publishedDate: "13.10.2016",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/list-zapisi-2016.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/list-zapisi-2016.pdf",
-    available: false,
-    relevanceScore: 75,
-    tags: ["лист записи", "внесение изменений"]
-  },
-  {
-    id: "list-zapisi-2017",
-    title: "Лист записи от 02.03.2017 года",
-    description: "Подтверждение о регистрации изменений 2017 года",
-    category: "Юридические документы",
-    fileSize: "0.5 MB",
-    publishedDate: "02.03.2017",
-    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/list-zapisi-2017.pdf",
-    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/list-zapisi-2017.pdf",
-    available: false,
-    relevanceScore: 74,
-    tags: ["лист записи", "регистрационные изменения"]
+    id: "vnutrennie-dokumenty",
+    title: "Внутренние документы по контролю качества",
+    description: "Процедура контроля деятельности членов СРО и качества выполняемых работ.",
+    category: "Нормативные документы",
+    fileSize: "540 KB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/vnutrennie_dokumenty.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/vnutrennie_dokumenty.pdf",
+    available: true,
+    relevanceScore: 88,
+    tags: ["контроль качества", "внутренние документы", "процедуры контроля"]
   },
 
   // Methodological Documents (Методические документы)
@@ -369,6 +317,99 @@ export const documents: Document[] = [
     available: true,
     relevanceScore: 79,
     tags: ["СОУТ", "условия труда", "безопасность"]
+  },
+
+  // NEW DOCUMENTS from DeepSeek knowledge base update - Added December 2025
+  {
+    id: "instruktsiya_po_zapolneniyu_godovogo_otchyota",
+    title: "Пошаговая инструкция по заполнению годового отчёта",
+    description: "Подробная инструкция по подготовке и заполнению годовой отчетности членов СРО",
+    category: "Методические документы",
+    fileSize: "2.1 MB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/instruktsiya_po_zapolneniyu_godovogo_otchyota.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/instruktsiya_po_zapolneniyu_godovogo_otchyota.pdf",
+    available: true,
+    relevanceScore: 92,
+    tags: ["инструкция", "годовой отчет", "отчетность"]
+  },
+  {
+    id: "pravila_obucheniaj_attestat_noso",
+    title: "ПРАВИЛА ПРОФЕССИОНАЛЬНОГО ОБУЧЕНИЯ, АТТЕСТАЦИИ РАБОТНИКОВ ЧЛЕНОВ АССОЦИАЦИИ",
+    description: "Правила обучения и аттестации специалистов строительства в СРО",
+    category: "Стандарты и квалификация",
+    fileSize: "1.8 MB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_obucheniaj_attestat_noso.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_obucheniaj_attestat_noso.pdf",
+    available: true,
+    relevanceScore: 94,
+    tags: ["правила обучения", "аттестация", "профессиональное обучение"]
+  },
+  {
+    id: "spetsialist_v_oblasti_inzhenerno_tekhnicheskogo_proektirovaniya",
+    title: "ПРОФЕССИОНАЛЬНЫЙ СТАНДАРТ Специалист в области инженерно-технического проектирования для градостроительной деятельности",
+    description: "Квалификационные требования к специалистам по проектированию",
+    category: "Стандарты и квалификация",
+    fileSize: "1.4 MB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/spetsialist_v_oblasti_inzhenerno_tekhnicheskogo_proektirovaniya.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/spetsialist_v_oblasti_inzhenerno_tekhnicheskogo_proektirovaniya.pdf",
+    available: true,
+    relevanceScore: 96,
+    tags: ["профстандарт", "проектирование", "градостроительная деятельность"]
+  },
+  {
+    id: "specialist_stroitelnogo_kontrolya",
+    title: "ПРОФЕССИОНАЛЬНЫЙ СТАНДАРТ Специалист строительного контроля",
+    description: "Требования к специалистам строительного контроля",
+    category: "Стандарты и квалификация",
+    fileSize: "1.1 MB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/specialist_stroitelnogo_kontrolya.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/specialist_stroitelnogo_kontrolya.pdf",
+    available: true,
+    relevanceScore: 95,
+    tags: ["профстандарт", "строительный контроль", "специалист"]
+  },
+  {
+    id: "zapros_noso",
+    title: "ЗАПРОС о предоставлении сведений из Единого реестра о членах СРО и их обязательствах",
+    description: "Запрос о предоставлении информации из реестра членов СРО",
+    category: "Информационная открытость",
+    fileSize: "198 KB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/zapros_noso.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/zapros_noso.pdf",
+    available: true,
+    relevanceScore: 85,
+    tags: ["запрос", "единый реестр", "члены СРО"]
+  },
+  {
+    id: "zayavlenie_o_vyhode_NOSO",
+    title: "Заявление о добровольном прекращении членства в саморегулируемой организации Ассоциации «Нижегородское объединение строительных организаций»",
+    description: "Процедура добровольного выхода из членов СРО",
+    category: "Нормативные документы",
+    fileSize: "247 KB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/zayavlenie_o_vyhode_NOSO.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/zayavlenie_o_vyhode_NOSO.pdf",
+    available: true,
+    relevanceScore: 88,
+    tags: ["заявление", "прекращение членства", "добровольный выход"]
+  },
+  {
+    id: "professionalno_eticheskiy_kodex_stroitelya",
+    title: "ПРОФЕССИОНАЛЬНО-ЭТИЧЕСКИЙ КОДЕКС СТРОИТЕЛЯ",
+    description: "Кодекс профессиональной этики строителей",
+    category: "Нормативные документы",
+    fileSize: "156 KB",
+    publishedDate: "1 hour ago",
+    fileUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/professionalno_eticheskiy_kodex_stroitelya.pdf",
+    downloadUrl: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/professionalno_eticheskiy_kodex_stroitelya.pdf",
+    available: true,
+    relevanceScore: 89,
+    tags: ["этический кодекс", "строители", "профессиональная этика"]
   }
 ];
 
