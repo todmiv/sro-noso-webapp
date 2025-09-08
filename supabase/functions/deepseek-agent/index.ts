@@ -28,18 +28,15 @@ interface DeepSeekRequest {
 // ПОЛНЫЙ СПИСОК ДОКУМЕНТОВ СРО НОСО ДЛЯ RAG АНАЛИЗА
 const DOCUMENTS_DATA: DocumentChunk[] = [
   // ОСНОВНЫЕ УЧРЕДИТЕЛЬНЫЕ ДОКУМЕНТЫ
+
+
+  // НОВЫЕ ДОКУМЕНТЫ - ДОБАВЛЕНЫ В GitHub Releases v1.0
+
   {
-    id: "ustav-sro-noso",
-    title: "Устав Ассоциации «Нижегородское объединение строительных организаций»",
-    content: "Основной устав организации. Регулирует деятельность, права и обязанности членов, внутреннюю структуру управления, цели и задачи СРО.",
-    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/ustav_sro_noso.pdf",
-    relevanceScore: 0
-  },
-  {
-    id: "svidetelstvo-gos-registratsiya",
-    title: "Свидетельство о государственной регистрации",
-    content: "Подтверждение государственной регистрации СРО как юридического лица. Регистрационные данные, ОГРН, ИНН СРО.",
-    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/svidetelstvo_gos_registratsiya.pdf",
+    id: "pravila-obucheniaj-attestat-noso",
+    title: "ПРАВИЛА ПРОФЕССИОНАЛЬНОГО ОБУЧЕНИЯ, АТТЕСТАЦИИ РАБОТНИКОВ ЧЛЕНОВ АССОЦИАЦИИ",
+    content: "Правила обучения и аттестации специалистов строительства в СРО. Требования к подготовке, программы обучения, порядок аттестации.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_obucheniaj_attestat_noso.pdf",
     relevanceScore: 0
   },
 
@@ -56,6 +53,22 @@ const DOCUMENTS_DATA: DocumentChunk[] = [
     title: "Правила осуществления саморегулирования",
     content: "Правила контролирования деятельности членов СРО. Процедуры проверки соблюдения стандартов, ведения реестров, отчетности.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/pravila_provedenia_samo_regulirovaniya.pdf",
+    relevanceScore: 0
+  },
+
+  // НОВЫЕ ПРОФЕССИОНАЛЬНЫЕ СТАНДАРТЫ
+  {
+    id: "spetsialist-v-oblasti-inzhenerno-tekhnicheskogo-proektirovaniya",
+    title: "ПРОФЕССИОНАЛЬНЫЙ СТАНДАРТ Специалист в области инженерно-технического проектирования для градостроительной деятельности",
+    content: "Квалификационные требования к специалистам по проектированию. Образование, опыт работы, профессиональные навыки в области градостроительного проектирования.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/spetsialist_v_oblasti_inzhenerno_tekhnicheskogo_proektirovaniya.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "specialist-stroitelnogo-kontrolya",
+    title: "ПРОФЕССИОНАЛЬНЫЙ СТАНДАРТ Специалист строительного контроля",
+    content: "Требования к специалистам строительного контроля. Образование, опыт работы, ответственность за контроль качества строительных работ.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/specialist_stroitelnogo_kontrolya.pdf",
     relevanceScore: 0
   },
 
@@ -274,6 +287,29 @@ const DOCUMENTS_DATA: DocumentChunk[] = [
     title: "Анкета удовлетворенности членов СРО",
     content: "Оценка качества услуг СРО. Опросы членов, качество обслуживания, предложения по улучшению.",
     url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/anketa_udovletvorennosti.pdf",
+    relevanceScore: 0
+  },
+
+  // НОВЫЕ ДОСТАВЛЕННЫЕ ДОКУМЕНТЫ (ЗАМЕНЯЮТ УДАЛЕННЫЕ)
+  {
+    id: "zapros-noso",
+    title: "ЗАПРОС о предоставлении сведений из Единого реестра о членах СРО и их обязательствах",
+    content: "Запрос о предоставлении информации из реестра членов СРО. Формы запросов, необходимые сведения, порядок получения данных о членах СРО.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/zapros_noso.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "zayavlenie-o-vyhode-NOSO",
+    title: "Заявление о добровольном прекращении членства в саморегулируемой организации Ассоциации «Нижегородское объединение строительных организаций»",
+    content: "Процедура добровольного выхода из членов СРО. Заявление о прекращении членства, условия выхода, возвратов платежей.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/zayavlenie_o_vyhode_NOSO.pdf",
+    relevanceScore: 0
+  },
+  {
+    id: "professionalno-eticheskiy-kodex-stroitelya",
+    title: "ПРОФЕССИОНАЛЬНО-ЭТИЧЕСКИЙ КОДЕКС СТРОИТЕЛЯ",
+    content: "Кодекс профессиональной этики строителей. Этические нормы, правила поведения, обязанности специалистов строительной отрасли.",
+    url: "https://github.com/todmiv/sro-noso-webapp/releases/download/v1.0/professionalno_eticheskiy_kodex_stroitelya.pdf",
     relevanceScore: 0
   }
 ];
